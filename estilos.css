@@ -1062,3 +1062,48 @@ button:disabled {
         width: 100%;
     }
 }
+/* =========================
+   BOTONES DEL EDITOR DE VISITA
+========================= */
+
+.acciones-editor-visita {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 15px;
+    flex-wrap: wrap;
+}
+
+.acciones-editor-visita button {
+    margin: 0;
+    white-space: nowrap;
+}
+
+.acciones-editor-visita .boton-eliminar {
+    background-color: #dc3545;
+    color: #ffffff;
+    border: none;
+}
+
+.acciones-editor-visita .boton-eliminar:hover {
+    background-color: #b02a37;
+}
+
+.acciones-editor-visita button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* En celulares se acomodan para que no se rompan */
+@media (max-width: 600px) {
+
+    .acciones-editor-visita {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .acciones-editor-visita button {
+        width: 100%;
+    }
+}
+
