@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consulta como invitado</title>
+    <link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+<div class="contenedor">
+    <div class="encabezado">
+        <h1>👤 Consulta como invitado</h1>
+        <p>Ingrese el DNI de la persona para consultar si tiene una visita registrada.</p>
+    </div>
+    <div id="mensajes"></div>
+    <form id="consulta-form" autocomplete="off">
+        <label for="dni">DNI:</label>
+        <input type="text" id="dni" name="dni" placeholder="Ej: 12345678" required maxlength="20" inputmode="numeric" autocomplete="off">
+        <button type="submit">🔎 Consultar DNI</button>
+    </form>
+    <div id="resultado"></div>
+    <div class="aviso">
+        <p>La consulta como invitado no permite registrar visitas ni acceder a información administrativa.</p>
+    </div>
+    <div class="botones-navegacion">
+        <a href="login.html" class="boton-navegacion">🔐 Acceso administrador</a>
+        <a href="index.html" class="boton-navegacion">⬅ Volver</a>
+    </div>
+</div>
+<script src="supabase-config.js"></script>
+<script src="app.js"></script>
+<script>initInvitado();</script>
+</body>
+</html>

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exportar visitas</title>
+    <link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+<div class="contenedor">
+    <div class="encabezado">
+        <h1>📥 Exportar visitas</h1>
+        <p>Preparando el archivo CSV...</p>
+    </div>
+    <div id="mensajes"></div>
+    <div class="botones-navegacion">
+        <a href="panel.html" class="boton-navegacion">⬅ Volver al panel</a>
+    </div>
+</div>
+<script src="supabase-config.js"></script>
+<script src="app.js"></script>
+<script>
+(async () => {
+    try {
+        await initExportar();
+        setTimeout(() => { window.location.href = 'panel.html'; }, 700);
+    } catch (error) {
+        showMessage('error', error.message || 'No se pudo exportar.');
+    }
+})();
+</script>
+</body>
+</html>

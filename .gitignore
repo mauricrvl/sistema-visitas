@@ -1,0 +1,5 @@
+# Nunca subir secretos del backend
+.env
+.env.*
+service_role.txt
+supabase/.temp/

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="google-site-verification" content="cxfGpsT4YyYM5P-_mvYl2dfZ0LLC_vyhNdfEDjS1eaE">
+    <title>Control de visitas</title>
+    <link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+<div class="contenedor">
+    <div class="encabezado">
+        <h1>Control de visitas</h1>
+        <p>Seleccione una opción para continuar.</p>
+    </div>
+
+    <div id="mensajes"></div>
+
+    <div id="estado-sesion" class="aviso estado-sesion" hidden>
+        <p>Sesión iniciada como: <strong id="usuario-sesion"></strong></p>
+    </div>
+
+    <div class="opciones-acceso">
+        <a href="login.html" class="opcion-acceso">
+            <span class="opcion-icono">🔐</span>
+            <strong>Iniciar sesión</strong>
+            <small>Acceso al panel de administración.</small>
+        </a>
+        <a href="invitado.html" class="opcion-acceso">
+            <span class="opcion-icono">👤</span>
+            <strong>Continuar como invitado</strong>
+            <small>Consultar si una persona tiene una visita registrada.</small>
+        </a>
+        <a href="panel.html" class="opcion-acceso" data-solo-invitado hidden>
+            <span class="opcion-icono">📋</span>
+            <strong>Ir al panel</strong>
+            <small>Gestionar visitas y administradores.</small>
+        </a>
+    </div>
+</div>
+<script src="supabase-config.js"></script>
+<script src="app.js"></script>
+<script>initIndex();</script>
+</body>
+</html>
