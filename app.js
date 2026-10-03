@@ -69,14 +69,6 @@ function clearSession() {
     localStorage.removeItem(SESSION_KEY);
 }
 
-function authHeaders(token) {
-    return token
-        ? {
-            Authorization: `Bearer ${token}`
-        }
-        : {};
-}
-
 async function rawFetch(url, options = {}) {
     return fetch(url, {
         ...options,
@@ -123,8 +115,7 @@ async function refreshSession() {
     const data = await response.json();
 
     const next = {
-        access_token:
-            data.access_token,
+        access_token: data.access_token,
 
         refresh_token:
             data.refresh_token ||
@@ -553,10 +544,6 @@ async function registrarVisita(dni, nombre) {
     );
 }
 
-/* =========================
-   EDITAR VISITA
-========================= */
-
 async function editarVisita(id, dni, nombre) {
 
     if (!id) {
@@ -585,6 +572,27 @@ async function editarVisita(id, dni, nombre) {
                 dni: valueDni,
                 nombre: valueNombre
             })
+        }
+    );
+}
+
+async function eliminarVisita(id) {
+
+    if (!id) {
+        throw new Error(
+            'No se encontró el ID de la visita.'
+        );
+    }
+
+    return await api(
+        `/rest/v1/visitas?id=eq.${encodeURIComponent(id)}`,
+        {
+            method: 'DELETE',
+
+            headers: {
+                Prefer:
+                    'return=representation'
+            }
         }
     );
 }
@@ -976,15 +984,9 @@ async function initPanel() {
         return;
     }
 
-    registrarSeccion.hidden =
-        true;
-
-    registrarSeccion.classList.add(
-        'seccion-oculta'
-    );
-
-    registrarSeccion.style.display =
-        'none';
+    registrarSeccion.hidden = true;
+    registrarSeccion.classList.add('seccion-oculta');
+    registrarSeccion.style.display = 'none';
 
     if (logout) {
 
@@ -1010,7 +1012,6 @@ async function initPanel() {
                 await obtenerVisitas();
 
             if (count) {
-
                 count.textContent =
                     rows.length;
             }
@@ -1040,7 +1041,6 @@ async function initPanel() {
                                 </td>
 
                                 <td>
-
                                     <button
                                         type="button"
                                         class="boton-editar btn-editar-visita"
@@ -1050,7 +1050,6 @@ async function initPanel() {
                                     >
                                         ✏️ Editar
                                     </button>
-
                                 </td>
 
                             </tr>
@@ -1163,11 +1162,12 @@ async function initPanel() {
                     required
                 >
 
-                <div style="margin-top:15px;">
+                <div class="acciones-editor-visita">
 
                     <button
                         type="submit"
                         class="boton-editar"
+                        id="guardar-edicion"
                     >
                         💾 Guardar cambios
                     </button>
@@ -1178,6 +1178,14 @@ async function initPanel() {
                         class="boton-navegacion"
                     >
                         ❌ Cancelar
+                    </button>
+
+                    <button
+                        type="button"
+                        id="eliminar-edicion"
+                        class="boton-eliminar"
+                    >
+                        🗑️ Eliminar
                     </button>
 
                 </div>
@@ -1213,9 +1221,19 @@ async function initPanel() {
                 '#editar-nombre'
             );
 
+        const guardar =
+            editor.querySelector(
+                '#guardar-edicion'
+            );
+
         const cancelar =
             editor.querySelector(
                 '#cancelar-edicion'
+            );
+
+        const eliminar =
+            editor.querySelector(
+                '#eliminar-edicion'
             );
 
         dniInput.addEventListener(
@@ -1250,16 +1268,15 @@ async function initPanel() {
             }
         );
 
+        /* =========================
+           GUARDAR CAMBIOS
+        ========================== */
+
         form.addEventListener(
             'submit',
             async (event) => {
 
                 event.preventDefault();
-
-                const button =
-                    form.querySelector(
-                        'button[type="submit"]'
-                    );
 
                 try {
 
@@ -1273,10 +1290,16 @@ async function initPanel() {
                             nombreInput.value
                         );
 
-                    button.disabled =
+                    guardar.disabled =
                         true;
 
-                    button.textContent =
+                    cancelar.disabled =
+                        true;
+
+                    eliminar.disabled =
+                        true;
+
+                    guardar.textContent =
                         'Guardando...';
 
                     await editarVisita(
@@ -1312,11 +1335,82 @@ async function initPanel() {
                         msg
                     );
 
-                    button.disabled =
+                    guardar.disabled =
                         false;
 
-                    button.textContent =
+                    cancelar.disabled =
+                        false;
+
+                    eliminar.disabled =
+                        false;
+
+                    guardar.textContent =
                         '💾 Guardar cambios';
+                }
+            }
+        );
+
+        /* =========================
+           ELIMINAR VISITA
+        ========================== */
+
+        eliminar.addEventListener(
+            'click',
+            async () => {
+
+                const confirmar =
+                    confirm(
+                        `¿Seguro que querés eliminar la visita de ${nombre} (DNI ${dni})?\n\nEsta acción no se puede deshacer.`
+                    );
+
+                if (!confirmar) {
+                    return;
+                }
+
+                guardar.disabled =
+                    true;
+
+                cancelar.disabled =
+                    true;
+
+                eliminar.disabled =
+                    true;
+
+                eliminar.textContent =
+                    'Eliminando...';
+
+                try {
+
+                    await eliminarVisita(id);
+
+                    editor.remove();
+
+                    showMessage(
+                        'exito',
+                        'La visita fue eliminada correctamente.'
+                    );
+
+                    await loadVisits();
+
+                } catch (error) {
+
+                    showMessage(
+                        'error',
+                        error.message ||
+                        'No se pudo eliminar la visita.'
+                    );
+
+                    guardar.disabled =
+                        false;
+
+                    cancelar.disabled =
+                        false;
+
+                    eliminar.disabled =
+                        false;
+
+                    eliminar.textContent =
+                        '🗑️ Eliminar';
                 }
             }
         );
@@ -1328,6 +1422,10 @@ async function initPanel() {
 
         dniInput.focus();
     }
+
+    /* =========================
+       BUSCAR DNI
+    ========================== */
 
     searchForm.addEventListener(
         'submit',
@@ -1454,6 +1552,10 @@ async function initPanel() {
             }
         }
     );
+
+    /* =========================
+       REGISTRAR VISITA
+    ========================== */
 
     registerForm.addEventListener(
         'submit',
