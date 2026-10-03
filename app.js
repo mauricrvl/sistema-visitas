@@ -837,7 +837,7 @@ function initInvitado() {
                     result.innerHTML = `
                         <div class="resultado ya-vino">
 
-                            <h2>🔴 YA VINO</h2>
+                            <h2>🔴 ASISTIÓ</h2>
 
                             <p>
                                 <strong>Nombre:</strong>
@@ -866,7 +866,7 @@ function initInvitado() {
                     result.innerHTML = `
                         <div class="resultado no-vino">
 
-                            <h2>🟢 NO VINO</h2>
+                            <h2>🟢 NO ASISTIÓ</h2>
 
                             <p>
                                 El DNI
@@ -976,10 +976,6 @@ async function initPanel() {
         return;
     }
 
-    /* =========================
-       OCULTAR REGISTRO AL ENTRAR
-    ========================== */
-
     registrarSeccion.hidden =
         true;
 
@@ -989,10 +985,6 @@ async function initPanel() {
 
     registrarSeccion.style.display =
         'none';
-
-    /* =========================
-       CERRAR SESIÓN
-    ========================== */
 
     if (logout) {
 
@@ -1009,10 +1001,6 @@ async function initPanel() {
             }
         );
     }
-
-    /* =========================
-       CARGAR VISITAS
-    ========================== */
 
     async function loadVisits() {
 
@@ -1076,10 +1064,6 @@ async function initPanel() {
                             </tr>
                         `;
 
-                /* =========================
-                   BOTONES EDITAR
-                ========================== */
-
                 list
                     .querySelectorAll(
                         '.btn-editar-visita'
@@ -1109,10 +1093,6 @@ async function initPanel() {
             );
         }
     }
-
-    /* =========================
-       EDITOR DE VISITA
-    ========================== */
 
     function mostrarEditorVisita(
         id,
@@ -1238,8 +1218,6 @@ async function initPanel() {
                 '#cancelar-edicion'
             );
 
-        /* Solo números */
-
         dniInput.addEventListener(
             'input',
             () => {
@@ -1251,8 +1229,6 @@ async function initPanel() {
                     );
             }
         );
-
-        /* Solo letras y espacios */
 
         nombreInput.addEventListener(
             'input',
@@ -1353,10 +1329,6 @@ async function initPanel() {
         dniInput.focus();
     }
 
-    /* =========================
-       BUSCAR DNI
-    ========================== */
-
     searchForm.addEventListener(
         'submit',
         async (e) => {
@@ -1386,14 +1358,12 @@ async function initPanel() {
                 const row =
                     await consultarDni(dni);
 
-                /* YA VINO */
-
                 if (row) {
 
                     searchResult.innerHTML = `
                         <div class="resultado ya-vino">
 
-                            <h2>🔴 YA VINO</h2>
+                            <h2>🔴 ASISTIÓ</h2>
 
                             <p>
                                 <strong>Nombre:</strong>
@@ -1420,12 +1390,10 @@ async function initPanel() {
                     return;
                 }
 
-                /* NO VINO */
-
                 searchResult.innerHTML = `
                     <div class="resultado no-vino">
 
-                        <h2>🟢 NO VINO</h2>
+                        <h2>🟢 NO ASISTIÓ</h2>
 
                         <p>
                             El DNI
@@ -1487,10 +1455,6 @@ async function initPanel() {
         }
     );
 
-    /* =========================
-       REGISTRAR VISITA
-    ========================== */
-
     registerForm.addEventListener(
         'submit',
         async (e) => {
@@ -1545,11 +1509,11 @@ async function initPanel() {
                     <div class="resultado exito">
 
                         <h2>
-                            ✅ ¡VISITA REGISTRADA CON ÉXITO!
+                            ✅ ¡ASISTENCIA REGISTRADA CON ÉXITO!
                         </h2>
 
                         <p>
-                            La visita fue registrada correctamente.
+                            La asistencia fue registrada correctamente.
                         </p>
 
                         <p>
