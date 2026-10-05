@@ -2547,15 +2547,12 @@ async function initPanel() {
                                 Esta persona recibe por sistema.
                             </p>
 
-                            <p>
-                                ⚠️ Para continuar,
-                                <strong>
-                                    tenés que registrar la visita.
-                                </strong>
-                            </p>
-
                         </div>
                     `;
+
+                    // Si recibe por sistema, no mostrar el formulario
+                    // para registrar visita.
+                    return;
 
                 } else {
 
