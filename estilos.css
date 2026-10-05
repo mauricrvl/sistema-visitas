@@ -1253,9 +1253,9 @@ button:disabled {
 ========================================= */
 
 .resultado.priset {
-    background: #fff3cd !important;
-    border: 2px solid #ffc107 !important;
-    color: #664d03 !important;
+    background: #3a3218 !important;
+    border: 2px solid #d4af37 !important;
+    color: #f5d76e !important;
 }
 
 .resultado.priset h1,
@@ -1264,11 +1264,5 @@ button:disabled {
 .resultado.priset p,
 .resultado.priset strong,
 .resultado.priset span {
-    color: #664d03 !important;
-}
-
-.resultado.priset button {
-    background: #d39e00 !important;
-    border-color: #b88600 !important;
-    color: #ffffff !important;
+    color: #f5d76e !important;
 }
