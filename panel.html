@@ -1,10 +1,22 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
     <title>Panel de Administración</title>
-    <link rel="stylesheet" href="estilos.css">
+
+    <link
+        rel="stylesheet"
+        href="estilos.css"
+    >
+
 </head>
 
 <body>
@@ -12,31 +24,64 @@
 <div class="contenedor grande">
 
     <div class="encabezado">
+
         <h1>📋 Panel de Administración</h1>
-        <p>Gestión de visitas y administradores.</p>
+
+        <p>
+            Gestión de visitas y administradores.
+        </p>
+
     </div>
+
 
     <div id="mensajes"></div>
 
+
     <div class="usuario-actual">
+
         Sesión iniciada como:
-        <strong id="usuario-panel">...</strong>
+
+        <strong id="usuario-panel">
+            ...
+        </strong>
+
     </div>
 
+
     <div class="menu">
-        <a href="panel.html">📋 Panel</a>
-        <a href="administradores.html">👤 Administradores</a>
-        <a href="invitado.html">🔎 Consulta invitado</a>
-        <a href="#" id="logout">🚪 Cerrar sesión</a>
+
+        <a href="panel.html">
+            📋 Panel
+        </a>
+
+        <a href="administradores.html">
+            👤 Administradores
+        </a>
+
+        <a href="invitado.html">
+            🔎 Consulta invitado
+        </a>
+
+        <a href="#" id="logout">
+            🚪 Cerrar sesión
+        </a>
+
     </div>
+
 
     <!-- =========================
          BUSCAR DNI
     ========================== -->
 
-    <h2>🔎 Buscar por DNI</h2>
+    <h2>
+        🔎 Buscar por DNI
+    </h2>
 
-    <form id="buscar-form" autocomplete="off">
+
+    <form
+        id="buscar-form"
+        autocomplete="off"
+    >
 
         <div class="buscador">
 
@@ -59,6 +104,7 @@
 
     </form>
 
+
     <!-- RESULTADO DE LA BÚSQUEDA -->
 
     <div id="resultado-busqueda"></div>
@@ -73,15 +119,24 @@
         class="seccion-oculta"
     >
 
-        <h2>📝 Registrar visita</h2>
+        <h2>
+            📝 Registrar visita
+        </h2>
+
 
         <div class="aviso-registro">
-            <strong>🟢 Este DNI no tiene una visita registrada.</strong>
+
+            <strong>
+                🟢 Este DNI no tiene una visita registrada.
+            </strong>
+
             <p>
                 Para continuar, tenés que registrar la visita
                 ingresando el nombre y apellido.
             </p>
+
         </div>
+
 
         <form
             id="registrar-form"
@@ -92,6 +147,7 @@
                 type="hidden"
                 name="dni"
             >
+
 
             <label for="nombre">
                 Nombre y apellido:
@@ -107,6 +163,20 @@
                 pattern="[A-Za-zÁÉÍÓÚáéíóúÑñÜü ]+"
                 oninput="this.value = this.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñÜü ]/g, '')"
             >
+
+
+            <label for="se-entrego">
+                Se entregó:
+            </label>
+
+            <input
+                type="text"
+                id="se-entrego"
+                name="se_entrego"
+                maxlength="200"
+                placeholder="Ingrese que se entrego"
+            >
+
 
             <button
                 type="submit"
@@ -126,25 +196,54 @@
          VISITAS REGISTRADAS
     ========================== -->
 
-    <h2>📋 Visitas registradas</h2>
+    <h2>
+        📋 Visitas registradas
+    </h2>
+
 
     <div class="contador">
+
         Cantidad de visitas:
-        <strong id="cantidad-visitas">0</strong>
+
+        <strong id="cantidad-visitas">
+            0
+        </strong>
+
     </div>
+
 
     <div class="tabla-scroll">
 
         <table>
 
             <thead>
+
                 <tr>
-                    <th>DNI</th>
-                    <th>Nombre</th>
-                    <th>Fecha y hora</th>
-                    <th>Acciones</th>
+
+                    <th>
+                        DNI
+                    </th>
+
+                    <th>
+                        Nombre
+                    </th>
+
+                    <th>
+                        Se entregó
+                    </th>
+
+                    <th>
+                        Fecha y hora
+                    </th>
+
+                    <th>
+                        Acciones
+                    </th>
+
                 </tr>
+
             </thead>
+
 
             <tbody id="tabla-visitas"></tbody>
 
@@ -166,12 +265,14 @@
             👤 Administradores
         </a>
 
+
         <a
             href="exportar.html"
             class="boton-navegacion"
         >
             📥 Exportar a EXEL
         </a>
+
 
         <a
             href="index.html"
@@ -186,11 +287,17 @@
 
 
 <script src="supabase-config.js"></script>
+
 <script src="app.js"></script>
 
+
 <script>
+
     initPanel();
+
 </script>
 
+
 </body>
+
 </html>
