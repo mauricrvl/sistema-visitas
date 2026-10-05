@@ -1248,3 +1248,27 @@ button:disabled {
         width: 100%;
     }
 }
+/* =========================================
+   RECIBE POR SISTEMA - PRISET
+========================================= */
+
+.resultado.priset {
+    background: #fff3cd !important;
+    border: 2px solid #ffc107 !important;
+    color: #664d03 !important;
+}
+
+.resultado.priset h1,
+.resultado.priset h2,
+.resultado.priset h3,
+.resultado.priset p,
+.resultado.priset strong,
+.resultado.priset span {
+    color: #664d03 !important;
+}
+
+.resultado.priset button {
+    background: #d39e00 !important;
+    border-color: #b88600 !important;
+    color: #ffffff !important;
+}
