@@ -487,6 +487,20 @@ function validarNombre(nombre) {
     return value;
 }
 
+function validarSeEntrego(valor) {
+
+    const value =
+        String(valor ?? '').trim();
+
+    if (value.length > 200) {
+        throw new Error(
+            'El campo "Se entregó" es demasiado largo.'
+        );
+    }
+
+    return value;
+}
+
 /* =========================
    VISITAS
 ========================= */
@@ -514,17 +528,24 @@ async function consultarDni(dni) {
 async function obtenerVisitas() {
 
     return await api(
-        '/rest/v1/visitas?select=id,dni,nombre,fecha_visita&order=fecha_visita.desc'
+        '/rest/v1/visitas?select=id,dni,nombre,se_entrego,fecha_visita&order=fecha_visita.desc'
     );
 }
 
-async function registrarVisita(dni, nombre) {
+async function registrarVisita(
+    dni,
+    nombre,
+    seEntrego
+) {
 
     const valueDni =
         validarDni(dni);
 
     const valueNombre =
         validarNombre(nombre);
+
+    const valueSeEntrego =
+        validarSeEntrego(seEntrego);
 
     return await api(
         '/rest/v1/visitas',
@@ -538,13 +559,19 @@ async function registrarVisita(dni, nombre) {
 
             body: JSON.stringify({
                 dni: valueDni,
-                nombre: valueNombre
+                nombre: valueNombre,
+                se_entrego: valueSeEntrego
             })
         }
     );
 }
 
-async function editarVisita(id, dni, nombre) {
+async function editarVisita(
+    id,
+    dni,
+    nombre,
+    seEntrego
+) {
 
     if (!id) {
         throw new Error(
@@ -558,6 +585,9 @@ async function editarVisita(id, dni, nombre) {
     const valueNombre =
         validarNombre(nombre);
 
+    const valueSeEntrego =
+        validarSeEntrego(seEntrego);
+
     return await api(
         `/rest/v1/visitas?id=eq.${encodeURIComponent(id)}`,
         {
@@ -570,7 +600,8 @@ async function editarVisita(id, dni, nombre) {
 
             body: JSON.stringify({
                 dni: valueDni,
-                nombre: valueNombre
+                nombre: valueNombre,
+                se_entrego: valueSeEntrego
             })
         }
     );
@@ -857,6 +888,17 @@ function initInvitado() {
                                 ${escapeHtml(row.dni)}
                             </p>
 
+                            ${
+                                row.se_entrego
+                                    ? `
+                                        <p>
+                                            <strong>Se entregó:</strong>
+                                            ${escapeHtml(row.se_entrego)}
+                                        </p>
+                                    `
+                                    : ''
+                            }
+
                             <p>
                                 <strong>Fecha y hora:</strong>
                                 ${escapeHtml(
@@ -1033,6 +1075,10 @@ async function initPanel() {
                                 </td>
 
                                 <td>
+                                    ${escapeHtml(row.se_entrego || '-')}
+                                </td>
+
+                                <td>
                                     ${escapeHtml(
                                         formatArgentina(
                                             row.fecha_visita
@@ -1047,6 +1093,7 @@ async function initPanel() {
                                         data-id="${escapeHtml(row.id)}"
                                         data-dni="${escapeHtml(row.dni)}"
                                         data-nombre="${escapeHtml(row.nombre)}"
+                                        data-se-entrego="${escapeHtml(row.se_entrego || '')}"
                                     >
                                         ✏️ Editar
                                     </button>
@@ -1057,7 +1104,7 @@ async function initPanel() {
 
                         : `
                             <tr>
-                                <td colspan="4">
+                                <td colspan="5">
                                     No hay visitas registradas.
                                 </td>
                             </tr>
@@ -1076,7 +1123,8 @@ async function initPanel() {
                                 mostrarEditorVisita(
                                     button.dataset.id,
                                     button.dataset.dni,
-                                    button.dataset.nombre
+                                    button.dataset.nombre,
+                                    button.dataset.seEntrego
                                 );
                             }
                         );
@@ -1096,7 +1144,8 @@ async function initPanel() {
     function mostrarEditorVisita(
         id,
         dni,
-        nombre
+        nombre,
+        seEntrego
     ) {
 
         const existente =
@@ -1162,6 +1211,18 @@ async function initPanel() {
                     required
                 >
 
+                <label for="editar-se-entrego">
+                    Se entregó:
+                </label>
+
+                <input
+                    type="text"
+                    id="editar-se-entrego"
+                    value="${escapeHtml(seEntrego || '')}"
+                    maxlength="200"
+                    placeholder="Ingrese lo que se entrego"
+                >
+
                 <div class="acciones-editor-visita">
 
                     <button
@@ -1219,6 +1280,11 @@ async function initPanel() {
         const nombreInput =
             editor.querySelector(
                 '#editar-nombre'
+            );
+
+        const seEntregoInput =
+            editor.querySelector(
+                '#editar-se-entrego'
             );
 
         const guardar =
@@ -1290,6 +1356,11 @@ async function initPanel() {
                             nombreInput.value
                         );
 
+                    const nuevoSeEntrego =
+                        validarSeEntrego(
+                            seEntregoInput.value
+                        );
+
                     guardar.disabled =
                         true;
 
@@ -1305,7 +1376,8 @@ async function initPanel() {
                     await editarVisita(
                         id,
                         nuevoDni,
-                        nuevoNombre
+                        nuevoNombre,
+                        nuevoSeEntrego
                     );
 
                     editor.remove();
@@ -1473,6 +1545,17 @@ async function initPanel() {
                                 ${escapeHtml(row.dni)}
                             </p>
 
+                            ${
+                                row.se_entrego
+                                    ? `
+                                        <p>
+                                            <strong>Se entregó:</strong>
+                                            ${escapeHtml(row.se_entrego)}
+                                        </p>
+                                    `
+                                    : ''
+                            }
+
                             <p>
                                 <strong>Fecha y hora:</strong>
                                 ${escapeHtml(
@@ -1516,6 +1599,11 @@ async function initPanel() {
 
                 registerForm.nombre.value =
                     '';
+
+                if (registerForm.se_entrego) {
+                    registerForm.se_entrego.value =
+                        '';
+                }
 
                 registrarSeccion.hidden =
                     false;
@@ -1571,10 +1659,16 @@ async function initPanel() {
             const nombre =
                 registerForm.nombre.value.trim();
 
+            const seEntrego =
+                registerForm.se_entrego
+                    ? registerForm.se_entrego.value.trim()
+                    : '';
+
             try {
 
                 validarDni(dni);
                 validarNombre(nombre);
+                validarSeEntrego(seEntrego);
 
             } catch (error) {
 
@@ -1604,7 +1698,8 @@ async function initPanel() {
 
                 await registrarVisita(
                     dni,
-                    nombre
+                    nombre,
+                    seEntrego
                 );
 
                 searchResult.innerHTML = `
@@ -1627,6 +1722,17 @@ async function initPanel() {
                             <strong>DNI:</strong>
                             ${escapeHtml(dni)}
                         </p>
+
+                        ${
+                            seEntrego
+                                ? `
+                                    <p>
+                                        <strong>Se entregó:</strong>
+                                        ${escapeHtml(seEntrego)}
+                                    </p>
+                                `
+                                : ''
+                        }
 
                         <p>
                             <strong>Fecha y hora:</strong>
@@ -1941,6 +2047,7 @@ async function initExportar() {
         [
             'DNI',
             'Nombre',
+            'Se entregó',
             'Fecha',
             'Hora'
         ]
@@ -1984,6 +2091,7 @@ async function initExportar() {
         csvRows.push([
             row.dni,
             row.nombre,
+            row.se_entrego || '',
             fecha,
             hora
         ]);
