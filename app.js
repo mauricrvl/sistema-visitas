@@ -4,546 +4,6 @@ const CONFIG = window.SUPABASE_CONFIG || {};
 const SUPABASE_URL = String(CONFIG.url || '').replace(/\/$/, '');
 const SUPABASE_KEY = String(CONFIG.publishableKey || '');
 const SESSION_KEY = 'control_visitas_session';
-const PRISET_DNIS = new Set([
-    '04435370',
-    '04524843',
-    '05112562',
-    '05112593',
-    '05576575',
-    '05680813',
-    '05680857',
-    '05680884',
-    '05680996',
-    '05940668',
-    '06360130',
-    '06360170',
-    '06360174',
-    '07934699',
-    '07943409',
-    '07943441',
-    '07949151',
-    '08073623',
-    '08140759',
-    '08563429',
-    '08665066',
-    '08667861',
-    '10031755',
-    '10340496',
-    '10393440',
-    '10592505',
-    '10646138',
-    '10646158',
-    '10652721',
-    '10652734',
-    '10652751',
-    '10812274',
-    '11006914',
-    '11006952',
-    '11006956',
-    '11093096',
-    '11106764',
-    '11333086',
-    '11367333',
-    '11760023',
-    '11760087',
-    '11805118',
-    '12143326',
-    '12143327',
-    '12156304',
-    '12156305',
-    '12156400',
-    '12305282',
-    '12305295',
-    '12305311',
-    '12305336',
-    '12305390',
-    '12389099',
-    '12541498',
-    '12893641',
-    '13061700',
-    '13105611',
-    '13105733',
-    '13294728',
-    '13335821',
-    '13335983',
-    '13446024',
-    '13585012',
-    '13585075',
-    '13585097',
-    '13585101',
-    '13585116',
-    '13585173',
-    '13585174',
-    '13585178',
-    '13585333',
-    '13585376',
-    '13917439',
-    '14186143',
-    '14248246',
-    '14248267',
-    '14248314',
-    '14248320',
-    '14248326',
-    '14248413',
-    '14397962',
-    '16427861',
-    '16516688',
-    '16642148',
-    '17153007',
-    '17153097',
-    '17209801',
-    '17209812',
-    '17209823',
-    '17313593',
-    '17325649',
-    '17426307',
-    '17548404',
-    '17548442',
-    '17631157',
-    '17779512',
-    '17779537',
-    '17828269',
-    '17828298',
-    '17832571',
-    '17832587',
-    '17923558',
-    '18013196',
-    '18077623',
-    '18207816',
-    '18233404',
-    '18233440',
-    '18233467',
-    '18233481',
-    '18269208',
-    '18343009',
-    '18380307',
-    '18380311',
-    '18406204',
-    '18406226',
-    '18406234',
-    '18455493',
-    '18504359',
-    '18527273',
-    '18595376',
-    '18675229',
-    '18690367',
-    '18788177',
-    '20133122',
-    '20133189',
-    '20133352',
-    '20309514',
-    '20480016',
-    '20480041',
-    '20530596',
-    '20634408',
-    '20634428',
-    '20634496',
-    '20634606',
-    '20802732',
-    '21100136',
-    '21100144',
-    '21166089',
-    '21166090',
-    '21166107',
-    '21182204',
-    '21182232',
-    '21182233',
-    '21182254',
-    '21182332',
-    '21360096',
-    '21360835',
-    '21564283',
-    '21667356',
-    '21667371',
-    '21935509',
-    '22041576',
-    '22291400',
-    '22359741',
-    '22396097',
-    '22597631',
-    '22597648',
-    '22597663',
-    '22690851',
-    '22690880',
-    '22904309',
-    '22904343',
-    '23016984',
-    '23071361',
-    '23488444',
-    '23498117',
-    '23634394',
-    '23688238',
-    '23733239',
-    '23752104',
-    '23752161',
-    '23791622',
-    '23791698',
-    '23791719',
-    '23791787',
-    '23798980',
-    '23977383',
-    '23982682',
-    '24026497',
-    '24331235',
-    '24331477',
-    '24362596',
-    '24688901',
-    '24688940',
-    '24735027',
-    '24735075',
-    '24735259',
-    '24735330',
-    '24972580',
-    '25135049',
-    '25135148',
-    '25135344',
-    '25135426',
-    '25319898',
-    '25462336',
-    '25573539',
-    '25590330',
-    '25590448',
-    '25728532',
-    '25780751',
-    '25991618',
-    '25991687',
-    '25991795',
-    '25991931',
-    '26135951',
-    '26204741',
-    '26248570',
-    '26248572',
-    '26360077',
-    '26360329',
-    '26580597',
-    '26593156',
-    '26611265',
-    '26611307',
-    '26791562',
-    '26878170',
-    '26878211',
-    '26878750',
-    '26930841',
-    '27041357',
-    '27075171',
-    '27125924',
-    '27196174',
-    '27227133',
-    '27560278',
-    '27617237',
-    '27682779',
-    '27686416',
-    '27760002',
-    '27760468',
-    '27760490',
-    '27760928',
-    '27766763',
-    '28005536',
-    '28258443',
-    '28308014',
-    '28308137',
-    '28741214',
-    '28744657',
-    '28888753',
-    '28888794',
-    '28928254',
-    '29034522',
-    '29034534',
-    '29079559',
-    '29226418',
-    '29226487',
-    '29270209',
-    '29270276',
-    '29276339',
-    '29507633',
-    '29588251',
-    '29613330',
-    '29613352',
-    '29613365',
-    '29613383',
-    '29690752',
-    '29694499',
-    '29702427',
-    '29702496',
-    '30052494',
-    '30116790',
-    '30151519',
-    '30243565',
-    '30271126',
-    '30274127',
-    '30274153',
-    '30274199',
-    '30274267',
-    '30274274',
-    '30274282',
-    '30621339',
-    '30621341',
-    '30621343',
-    '30621373',
-    '30621398',
-    '30621422',
-    '30621450',
-    '30621473',
-    '30768544',
-    '30768569',
-    '31085727',
-    '31098542',
-    '31278229',
-    '31324283',
-    '31399137',
-    '31399176',
-    '31399189',
-    '31430409',
-    '31633650',
-    '31778916',
-    '31778929',
-    '31778936',
-    '31778990',
-    '31979315',
-    '31979337',
-    '31979341',
-    '31979345',
-    '31979641',
-    '31979664',
-    '32210578',
-    '32215012',
-    '32215016',
-    '32215063',
-    '32215092',
-    '32215244',
-    '32307893',
-    '32723509',
-    '32723581',
-    '32782460',
-    '32878018',
-    '33059496',
-    '33185699',
-    '33236962',
-    '33319088',
-    '33321913',
-    '33321993',
-    '33322006',
-    '33322043',
-    '33322150',
-    '33322159',
-    '33322163',
-    '33429692',
-    '33460628',
-    '33460695',
-    '33460703',
-    '33460731',
-    '33460734',
-    '33672430',
-    '33679970',
-    '34096588',
-    '34194452',
-    '34428315',
-    '34428337',
-    '34428356',
-    '34428376',
-    '34428396',
-    '34697043',
-    '34698357',
-    '34698398',
-    '34916882',
-    '35023577',
-    '35023604',
-    '35185006',
-    '35509100',
-    '35735401',
-    '35735407',
-    '35735461',
-    '35735465',
-    '35735470',
-    '35735529',
-    '35735913',
-    '35849035',
-    '35849079',
-    '35849102',
-    '35849156',
-    '35849164',
-    '35849191',
-    '35849497',
-    '35850208',
-    '35850423',
-    '35850478',
-    '35850528',
-    '35850546',
-    '35850548',
-    '35850590',
-    '35852057',
-    '35852787',
-    '35857010',
-    '35857051',
-    '35857086',
-    '35857123',
-    '35857160',
-    '35857164',
-    '35857172',
-    '35938213',
-    '36253880',
-    '36253884',
-    '36253887',
-    '36253890',
-    '36253895',
-    '36675601',
-    '37647117',
-    '37647153',
-    '37647165',
-    '37648686',
-    '37924451',
-    '37924453',
-    '37924483',
-    '37924514',
-    '37924528',
-    '37924591',
-    '37925144',
-    '38076225',
-    '38077392',
-    '38079005',
-    '38079016',
-    '38219472',
-    '38411219',
-    '38462492',
-    '38463141',
-    '38463746',
-    '38463833',
-    '38463844',
-    '38507916',
-    '38595189',
-    '39007869',
-    '39424425',
-    '39425395',
-    '39425721',
-    '39425766',
-    '39425769',
-    '39425786',
-    '39651315',
-    '39651386',
-    '39792773',
-    '39792788',
-    '39793307',
-    '39956055',
-    '39956143',
-    '39956401',
-    '39994201',
-    '39994270',
-    '39994292',
-    '39995224',
-    '40229128',
-    '40265754',
-    '40367724',
-    '40470827',
-    '40470922',
-    '40470936',
-    '40470990',
-    '40591991',
-    '40592144',
-    '40592173',
-    '40593018',
-    '40728869',
-    '40766089',
-    '41053852',
-    '41054328',
-    '41270532',
-    '41270536',
-    '41321763',
-    '41531703',
-    '41531742',
-    '41598346',
-    '41701442',
-    '41701450',
-    '41721012',
-    '41721411',
-    '41814467',
-    '41909054',
-    '41909055',
-    '41957732',
-    '42081076',
-    '42081100',
-    '42207238',
-    '42207248',
-    '42250081',
-    '42250089',
-    '42287978',
-    '42334874',
-    '42712160',
-    '42751169',
-    '42852922',
-    '42853300',
-    '42990429',
-    '42990450',
-    '43078785',
-    '43157561',
-    '43280858',
-    '43281007',
-    '43375954',
-    '43375955',
-    '43423185',
-    '43423192',
-    '43423198',
-    '43488902',
-    '43488907',
-    '43488927',
-    '43489289',
-    '43556314',
-    '43638238',
-    '43641806',
-    '43688916',
-    '43690014',
-    '43952936',
-    '44018328',
-    '44018753',
-    '44018756',
-    '44018774',
-    '44018775',
-    '44018827',
-    '44060960',
-    '44060962',
-    '44062416',
-    '44248541',
-    '44249648',
-    '44316522',
-    '44665729',
-    '44844833',
-    '44915636',
-    '44916912',
-    '44991063',
-    '45212673',
-    '45212681',
-    '45377854',
-    '45472239',
-    '45472714',
-    '45635009',
-    '45635027',
-    '45980909',
-    '45980962',
-    '46259959',
-    '46485335',
-    '46485350',
-    '46544003',
-    '46725734',
-    '46804294',
-    '46805817',
-    '46933148',
-    '46933150',
-    '47046540',
-    '48595739',
-    '4879618',
-    '49351739',
-    '5680905',
-    '6360140'
-]);
-
-function normalizarDniPriset(dni) {
-    return String(dni ?? '').trim().replace(/\D/g, '');
-}
-
-function esPersonaPriset(dni) {
-    const valor = normalizarDniPriset(dni);
-    return valor !== '' && PRISET_DNIS.has(valor);
-}
-
 
 function configured() {
     return SUPABASE_URL.startsWith('https://') &&
@@ -1358,6 +818,119 @@ function initLogin() {
             }
         }
     );
+    /* =========================
+   RECUPERAR CONTRASEÑA
+========================= */
+
+async function enviarRecuperacion(
+    usuario
+) {
+
+    const value =
+        String(usuario)
+            .trim()
+            .toLowerCase();
+
+    if (!value) {
+        throw new Error(
+            'Ingresá tu usuario.'
+        );
+    }
+
+    const email =
+        internalEmail(value);
+
+    const response =
+        await rawFetch(
+            `${SUPABASE_URL}/auth/v1/recover`,
+            {
+                method: 'POST',
+
+                body: JSON.stringify({
+                    email
+                })
+            }
+        );
+
+    const data =
+        await response
+            .json()
+            .catch(() => ({}));
+
+    if (!response.ok) {
+        throw new Error(
+            data.error_description ||
+            data.msg ||
+            'No se pudo enviar el correo de recuperación.'
+        );
+    }
+
+    return true;
+}
+
+function initRecuperarPassword() {
+
+    const form =
+        document.querySelector(
+            '#recuperar-form'
+        );
+
+    if (!form) {
+        return;
+    }
+
+    form.addEventListener(
+        'submit',
+        async event => {
+
+            event.preventDefault();
+
+            clearMessage();
+
+            const usuario =
+                form.usuario.value;
+
+            const button =
+                form.querySelector(
+                    'button[type="submit"]'
+                );
+
+            button.disabled = true;
+
+            button.textContent =
+                'Enviando...';
+
+            try {
+
+                await enviarRecuperacion(
+                    usuario
+                );
+
+                showMessage(
+                    'exito',
+                    'Si el usuario existe, se envió el correo para recuperar la contraseña.'
+                );
+
+                form.reset();
+
+            } catch (error) {
+
+                showMessage(
+                    'error',
+                    error.message ||
+                    'No se pudo enviar el correo.'
+                );
+
+            } finally {
+
+                button.disabled =
+                    false;
+
+                button.textContent =
+                    '📧 Recuperar contraseña';
+            }
+        }
+    );
 }
 
 /* =========================
@@ -1368,72 +941,82 @@ function initInvitado() {
 
     const form =
         document.querySelector(
-            '#consulta-form'
+            '#buscar-dni-form'
         );
 
-    const result =
-        document.querySelector(
-            '#resultado'
-        );
-
-    if (
-        !form ||
-        !requireConfigOrShow()
-    ) {
+    if (!form) {
         return;
     }
 
+    const resultado =
+        document.querySelector(
+            '#resultado-visita'
+        );
+
     form.addEventListener(
         'submit',
-        async (event) => {
+        async event => {
 
             event.preventDefault();
 
-            clearMessage();
-
-            result.innerHTML = '';
-
-            const dni =
-                form.dni.value.trim();
-
-            const button =
-                form.querySelector(
-                    'button[type="submit"]'
-                );
-
-            button.disabled = true;
-
-            button.textContent =
-                'Consultando...';
+            if (resultado) {
+                resultado.innerHTML =
+                    '<div>Buscando...</div>';
+            }
 
             try {
 
-                const row =
-                    await consultarDni(dni);
+                const dni =
+                    validarDni(
+                        form.dni.value
+                    );
 
-                if (row) {
+                const visita =
+                    await consultarDni(
+                        dni
+                    );
 
-                    result.innerHTML = `
-                        <div class="resultado ya-vino">
+                if (!visita) {
 
-                            <h2>🔴 ASISTIÓ</h2>
+                    if (resultado) {
+                        resultado.innerHTML =
+                            '<div class="error">No se encontró una visita registrada para ese DNI.</div>';
+                    }
 
-                            <p>
-                                <strong>Nombre:</strong>
-                                ${escapeHtml(row.nombre)}
-                            </p>
+                    return;
+                }
+
+                if (resultado) {
+
+                    resultado.innerHTML = `
+                        <div class="resultado-visita">
+
+                            <h2>
+                                Visita encontrada
+                            </h2>
 
                             <p>
                                 <strong>DNI:</strong>
-                                ${escapeHtml(row.dni)}
+                                ${escapeHtml(
+                                    visita.dni
+                                )}
+                            </p>
+
+                            <p>
+                                <strong>Nombre:</strong>
+                                ${escapeHtml(
+                                    visita.nombre
+                                )}
                             </p>
 
                             ${
-                                row.se_entrego
+                                visita.se_entrego
                                     ? `
                                         <p>
                                             <strong>Se entregó:</strong>
-                                            ${escapeHtml(row.se_entrego)}
+                                            ${escapeHtml(
+                                                visita.se_entrego
+                                            )}
                                         </p>
                                     `
                                     : ''
@@ -1443,27 +1026,9 @@ function initInvitado() {
                                 <strong>Fecha y hora:</strong>
                                 ${escapeHtml(
                                     formatArgentina(
-                                        row.fecha_visita
+                                        visita.fecha_visita
                                     )
                                 )}
-                            </p>
-
-                        </div>
-                    `;
-
-                } else {
-
-                    result.innerHTML = `
-                        <div class="resultado no-vino">
-
-                            <h2>🟢 NO ASISTIÓ</h2>
-
-                            <p>
-                                El DNI
-                                <strong>
-                                    ${escapeHtml(dni)}
-                                </strong>
-                                no tiene una visita registrada.
                             </p>
 
                         </div>
@@ -1472,18 +1037,14 @@ function initInvitado() {
 
             } catch (error) {
 
-                showMessage(
-                    'error',
-                    error.message ||
-                    'No se pudo realizar la consulta.'
-                );
+                if (resultado) {
 
-            } finally {
-
-                button.disabled = false;
-
-                button.textContent =
-                    '🔎 Consultar DNI';
+                    resultado.innerHTML =
+                        `<div class="error">${escapeHtml(
+                            error.message ||
+                            'No se pudo realizar la búsqueda.'
+                        )}</div>`;
+                }
             }
         }
     );
@@ -1495,36 +1056,56 @@ function initInvitado() {
 
 async function initPanel() {
 
-    if (!requireConfigOrShow()) {
+    const auth =
+        await requireAdmin();
+
+    if (!auth) {
         return;
     }
 
-    const access =
-        await requireAdmin();
+    const admin =
+        auth.admin;
 
-    if (!access) return;
-
-    const { admin } =
-        access;
-
-    const user =
-        document.querySelector(
-            '#usuario-panel'
+    document
+        .querySelectorAll(
+            '[data-usuario-admin]'
+        )
+        .forEach(
+            element => {
+                element.textContent =
+                    admin.usuario;
+            }
         );
 
-    if (user) {
-        user.textContent =
-            admin.usuario;
-    }
-
-    const list =
-        document.querySelector(
-            '#tabla-visitas'
+    const logoutButtons =
+        document.querySelectorAll(
+            '[data-logout]'
         );
+
+    logoutButtons.forEach(
+        button => {
+
+            button.addEventListener(
+                'click',
+                async () => {
+
+                    await signOut();
+
+                    window.location.href =
+                        'login.html';
+                }
+            );
+        }
+    );
 
     const searchForm =
         document.querySelector(
-            '#buscar-form'
+            '#buscar-visita-form'
+        );
+
+    const searchInput =
+        document.querySelector(
+            '#buscar-dni'
         );
 
     const searchResult =
@@ -1532,386 +1113,1129 @@ async function initPanel() {
             '#resultado-busqueda'
         );
 
-    const registerForm =
+    if (
+        searchForm &&
+        searchInput
+    ) {
+
+        searchForm.addEventListener(
+            'submit',
+            async event => {
+
+                event.preventDefault();
+
+                if (searchResult) {
+                    searchResult.innerHTML =
+                        '<div>Buscando...</div>';
+                }
+
+                try {
+
+                    const dni =
+                        validarDni(
+                            searchInput.value
+                        );
+
+                    const visita =
+                        await consultarDni(
+                            dni
+                        );
+
+                    if (!visita) {
+
+                        if (searchResult) {
+                            searchResult.innerHTML =
+                                '<div class="error">No se encontró ninguna visita con ese DNI.</div>';
+                        }
+
+                        return;
+                    }
+
+                    if (searchResult) {
+
+                        searchResult.innerHTML = `
+                            <div class="resultado-visita">
+
+                                <p>
+                                    <strong>DNI:</strong>
+                                    ${escapeHtml(
+                                        visita.dni
+                                    )}
+                                </p>
+
+                                <p>
+                                    <strong>Nombre:</strong>
+                                    ${escapeHtml(
+                                        visita.nombre
+                                    )}
+                                </p>
+
+                                ${
+                                    visita.se_entrego
+                                        ? `
+                                            <p>
+                                                <strong>Se entregó:</strong>
+                                                ${escapeHtml(
+                                                    visita.se_entrego
+                                                )}
+                                            </p>
+                                        `
+                                        : ''
+                                }
+
+                                <p>
+                                    <strong>Fecha y hora:</strong>
+                                    ${escapeHtml(
+                                        formatArgentina(
+                                            visita.fecha_visita
+                                        )
+                                    )}
+                                </p>
+
+                            </div>
+                        `;
+                    }
+
+                } catch (error) {
+
+                    if (searchResult) {
+                        searchResult.innerHTML =
+                            `<div class="error">${escapeHtml(
+                                error.message ||
+                                'No se pudo realizar la búsqueda.'
+                            )}</div>`;
+                    }
+                }
+            }
+        );
+    }
+
+    const formRegistro =
         document.querySelector(
-            '#registrar-form'
+            '#registro-visita-form'
         );
 
-    const registrarSeccion =
+    if (formRegistro) {
+
+        formRegistro.addEventListener(
+            'submit',
+            async event => {
+
+                event.preventDefault();
+
+                const button =
+                    formRegistro.querySelector(
+                        'button[type="submit"]'
+                    );
+
+                const mensaje =
+                    document.querySelector(
+                        '#mensaje-registro'
+                    );
+
+                if (mensaje) {
+                    mensaje.innerHTML =
+                        '';
+                }
+
+                button.disabled =
+                    true;
+
+                button.textContent =
+                    'Registrando...';
+
+                try {
+
+                    const dni =
+                        validarDni(
+                            formRegistro.dni.value
+                        );
+
+                    const nombre =
+                        validarNombre(
+                            formRegistro.nombre.value
+                        );
+
+                    const seEntrego =
+                        validarSeEntrego(
+                            formRegistro.se_entrego?.value ||
+                            ''
+                        );
+
+                    const existente =
+                        await consultarDni(
+                            dni
+                        );
+
+                    if (existente) {
+
+                        throw new Error(
+                            'Ya existe una visita registrada con ese DNI.'
+                        );
+                    }
+
+                    await registrarVisita(
+                        dni,
+                        nombre,
+                        seEntrego
+                    );
+
+                    if (mensaje) {
+
+                        mensaje.innerHTML =
+                            '<div class="exito">Visita registrada correctamente.</div>';
+                    }
+
+                    formRegistro.reset();
+
+                    await loadVisits();
+
+                } catch (error) {
+
+                    if (mensaje) {
+
+                        mensaje.innerHTML =
+                            `<div class="error">${escapeHtml(
+                                error.message ||
+                                'No se pudo registrar la visita.'
+                            )}</div>`;
+                    }
+
+                } finally {
+
+                    button.disabled =
+                        false;
+
+                    button.textContent =
+                        '➕ Registrar visita';
+                }
+            }
+        );
+    }
+
+    const btnActualizar =
         document.querySelector(
-            '#registrar-seccion'
+            '#btn-actualizar'
         );
 
-    const count =
+    if (btnActualizar) {
+
+        btnActualizar.addEventListener(
+            'click',
+            async () => {
+
+                await loadVisits();
+            }
+        );
+    }
+
+    /* =========================
+       IMPORTAR EXCEL
+    ========================= */
+
+    function convertirFechaExcel(valor) {
+
+        if (
+            valor === null ||
+            valor === undefined ||
+            valor === ''
+        ) {
+            return null;
+        }
+
+        let fecha = null;
+
+        if (valor instanceof Date) {
+
+            fecha = valor;
+
+        } else if (
+            typeof valor === 'number'
+        ) {
+
+            const excelEpoch =
+                new Date(
+                    Date.UTC(
+                        1899,
+                        11,
+                        30
+                    )
+                );
+
+            fecha =
+                new Date(
+                    excelEpoch.getTime() +
+                    valor * 86400000
+                );
+
+        } else {
+
+            const texto =
+                String(valor).trim();
+
+            const partes =
+                texto.split('/');
+
+            if (
+                partes.length === 3
+            ) {
+
+                const dia =
+                    parseInt(
+                        partes[0],
+                        10
+                    );
+
+                const mes =
+                    parseInt(
+                        partes[1],
+                        10
+                    );
+
+                const anio =
+                    parseInt(
+                        partes[2],
+                        10
+                    );
+
+                if (
+                    Number.isInteger(dia) &&
+                    Number.isInteger(mes) &&
+                    Number.isInteger(anio)
+                ) {
+
+                    fecha =
+                        new Date(
+                            anio,
+                            mes - 1,
+                            dia,
+                            12,
+                            0,
+                            0
+                        );
+                }
+            }
+
+            if (!fecha) {
+                fecha =
+                    new Date(texto);
+            }
+        }
+
+        if (
+            !fecha ||
+            Number.isNaN(
+                fecha.getTime()
+            )
+        ) {
+            return null;
+        }
+
+        const anio =
+            fecha.getFullYear();
+
+        const mes =
+            String(
+                fecha.getMonth() + 1
+            ).padStart(
+                2,
+                '0'
+            );
+
+        const dia =
+            String(
+                fecha.getDate()
+            ).padStart(
+                2,
+                '0'
+            );
+
+        return `${anio}-${mes}-${dia}T12:00:00-03:00`;
+    }
+
+    function obtenerDniNormalizado(
+        valor
+    ) {
+
+        return String(
+            valor ?? ''
+        )
+            .trim()
+            .replace(
+                /\D/g,
+                ''
+            );
+    }
+
+    async function obtenerDnisExistentes(
+        dnis
+    ) {
+
+        const existentes =
+            new Set();
+
+        const unicos = [
+            ...new Set(
+                dnis
+                    .map(
+                        obtenerDniNormalizado
+                    )
+                    .filter(Boolean)
+            )
+        ];
+
+        const TAMANO_LOTE =
+            50;
+
+        for (
+            let i = 0;
+            i < unicos.length;
+            i += TAMANO_LOTE
+        ) {
+
+            const lote =
+                unicos.slice(
+                    i,
+                    i + TAMANO_LOTE
+                );
+
+            if (!lote.length) {
+                continue;
+            }
+
+            const filtro =
+                lote.join(',');
+
+            const rows =
+                await api(
+                    `/rest/v1/visitas?select=dni&dni=in.(${filtro})`
+                );
+
+            (
+                rows || []
+            ).forEach(
+                row => {
+
+                    const dni =
+                        obtenerDniNormalizado(
+                            row.dni
+                        );
+
+                    if (dni) {
+                        existentes.add(
+                            dni
+                        );
+                    }
+                }
+            );
+        }
+
+        return existentes;
+    }
+        const archivoExcel =
         document.querySelector(
-            '#cantidad-visitas'
+            '#archivo-excel'
         );
 
-    const logout =
+    const btnImportarExcel =
         document.querySelector(
-            '#logout'
+            '#btn-importar-excel'
+        );
+
+    const resultadoImportacion =
+        document.querySelector(
+            '#resultado-importacion'
         );
 
     if (
-        !searchForm ||
-        !searchResult ||
-        !registerForm ||
-        !registrarSeccion
+        archivoExcel &&
+        btnImportarExcel
     ) {
 
-        console.error(
-            'Faltan elementos del formulario de visitas en panel.html.'
+        btnImportarExcel.addEventListener(
+            'click',
+            async () => {
+
+                if (
+                    !archivoExcel.files.length
+                ) {
+
+                    if (
+                        resultadoImportacion
+                    ) {
+
+                        resultadoImportacion.innerHTML =
+                            '<div class="error">Seleccioná un archivo Excel.</div>';
+                    }
+
+                    return;
+                }
+
+                if (
+                    typeof XLSX ===
+                    'undefined'
+                ) {
+
+                    if (
+                        resultadoImportacion
+                    ) {
+
+                        resultadoImportacion.innerHTML =
+                            '<div class="error">No se pudo cargar el lector de Excel. Revisá la conexión a Internet.</div>';
+                    }
+
+                    return;
+                }
+
+                const archivo =
+                    archivoExcel.files[0];
+
+                btnImportarExcel.disabled =
+                    true;
+
+                btnImportarExcel.textContent =
+                    'Importando...';
+
+                if (
+                    resultadoImportacion
+                ) {
+
+                    resultadoImportacion.innerHTML =
+                        '<div>Procesando el Excel...</div>';
+                }
+
+                try {
+
+                    const buffer =
+                        await archivo.arrayBuffer();
+
+                    const workbook =
+                        XLSX.read(
+                            buffer,
+                            {
+                                type: 'array',
+                                cellDates: true
+                            }
+                        );
+
+                    const primeraHoja =
+                        workbook.Sheets[
+                            workbook.SheetNames[0]
+                        ];
+
+                    if (!primeraHoja) {
+
+                        throw new Error(
+                            'El Excel no contiene ninguna hoja.'
+                        );
+                    }
+
+                    const filas =
+                        XLSX.utils.sheet_to_json(
+                            primeraHoja,
+                            {
+                                defval: '',
+                                raw: true
+                            }
+                        );
+
+                    if (!filas.length) {
+
+                        throw new Error(
+                            'El Excel está vacío.'
+                        );
+                    }
+
+                    const primeraFila =
+                        filas[0];
+
+                    const claves =
+                        Object.keys(
+                            primeraFila
+                        );
+
+                    function buscarColumna(
+                        nombre
+                    ) {
+
+                        const objetivo =
+                            String(nombre)
+                                .trim()
+                                .toUpperCase();
+
+                        return claves.find(
+                            clave =>
+                                String(clave)
+                                    .trim()
+                                    .toUpperCase() ===
+                                objetivo
+                        );
+                    }
+
+                    const columnaDni =
+                        buscarColumna(
+                            'DNI'
+                        );
+
+                    const columnaNombre =
+                        buscarColumna(
+                            'NOMBRE Y APELLIDO'
+                        );
+
+                    const columnaBeneficio =
+                        buscarColumna(
+                            'BENEFICIO'
+                        );
+
+                    const columnaFecha =
+                        buscarColumna(
+                            'FECHA'
+                        );
+
+                    if (
+                        !columnaDni ||
+                        !columnaNombre ||
+                        !columnaBeneficio ||
+                        !columnaFecha
+                    ) {
+
+                        throw new Error(
+                            'El Excel debe tener las columnas FECHA, NOMBRE Y APELLIDO, DNI y BENEFICIO.'
+                        );
+                    }
+
+                    const registros = [];
+
+                    const dnisExcel =
+                        new Set();
+
+                    let sinDni = 0;
+
+                    let fechasInvalidas =
+                        0;
+
+                    let duplicadosExcel =
+                        0;
+
+                    filas.forEach(
+                        fila => {
+
+                            const dni =
+                                obtenerDniNormalizado(
+                                    fila[
+                                        columnaDni
+                                    ]
+                                );
+
+                            if (!dni) {
+
+                                sinDni++;
+
+                                return;
+                            }
+
+                            if (
+                                dnisExcel.has(
+                                    dni
+                                )
+                            ) {
+
+                                duplicadosExcel++;
+
+                                return;
+                            }
+
+                            const fecha =
+                                convertirFechaExcel(
+                                    fila[
+                                        columnaFecha
+                                    ]
+                                );
+
+                            if (!fecha) {
+
+                                fechasInvalidas++;
+
+                                return;
+                            }
+
+                            const nombre =
+                                String(
+                                    fila[
+                                        columnaNombre
+                                    ] ?? ''
+                                ).trim();
+
+                            const beneficio =
+                                String(
+                                    fila[
+                                        columnaBeneficio
+                                    ] ?? ''
+                                ).trim();
+
+                            dnisExcel.add(
+                                dni
+                            );
+
+                            registros.push({
+                                dni,
+                                nombre,
+                                se_entrego:
+                                    beneficio,
+                                fecha_visita:
+                                    fecha
+                            });
+                        }
+                    );
+
+                    /*
+                     * PRIMERA PROTECCIÓN:
+                     * buscamos en Supabase todos
+                     * los DNI que ya existen.
+                     */
+
+                    const dnisExistentes =
+                        await obtenerDnisExistentes(
+                            registros.map(
+                                registro =>
+                                    registro.dni
+                            )
+                        );
+
+                    /*
+                     * Solamente dejamos los DNI
+                     * que todavía NO existen.
+                     */
+
+                    const nuevos =
+                        registros.filter(
+                            registro =>
+                                !dnisExistentes.has(
+                                    registro.dni
+                                )
+                        );
+
+                    let importados =
+                        0;
+
+                    const TAMANO_LOTE =
+                        50;
+
+                    /*
+                     * Insertamos en lotes de 50.
+                     */
+
+                    for (
+                        let i = 0;
+                        i < nuevos.length;
+                        i += TAMANO_LOTE
+                    ) {
+
+                        const lote =
+                            nuevos.slice(
+                                i,
+                                i + TAMANO_LOTE
+                            );
+
+                        await api(
+                            '/rest/v1/visitas',
+                            {
+                                method: 'POST',
+
+                                headers: {
+                                    Prefer:
+                                        'resolution=ignore-duplicates,return=minimal'
+                                },
+
+                                body:
+                                    JSON.stringify(
+                                        lote
+                                    )
+                            }
+                        );
+
+                        importados +=
+                            lote.length;
+                    }
+
+                    const yaExistian =
+                        registros.filter(
+                            registro =>
+                                dnisExistentes.has(
+                                    registro.dni
+                                )
+                        ).length;
+
+                    if (
+                        resultadoImportacion
+                    ) {
+
+                        resultadoImportacion.innerHTML = `
+                            <div class="exito">
+
+                                <strong>
+                                    Importación terminada.
+                                </strong>
+
+                                <br><br>
+
+                                Nuevos importados:
+                                ${importados}
+
+                                <br>
+
+                                DNI que ya existían en Supabase:
+                                ${yaExistian}
+
+                                <br>
+
+                                DNI repetidos dentro del Excel:
+                                ${duplicadosExcel}
+
+                                <br>
+
+                                Filas sin DNI:
+                                ${sinDni}
+
+                                <br>
+
+                                Fechas inválidas:
+                                ${fechasInvalidas}
+
+                            </div>
+                        `;
+                    }
+
+                    /*
+                     * Limpiamos el selector
+                     * del archivo.
+                     */
+
+                    archivoExcel.value =
+                        '';
+
+                    /*
+                     * Actualizamos la tabla.
+                     */
+
+                    await loadVisits();
+
+                } catch (error) {
+
+                    if (
+                        resultadoImportacion
+                    ) {
+
+                        resultadoImportacion.innerHTML = `
+                            <div class="error">
+                                ${escapeHtml(
+                                    error.message ||
+                                    'No se pudo importar el Excel.'
+                                )}
+                            </div>
+                        `;
+                    }
+
+                } finally {
+
+                    btnImportarExcel.disabled =
+                        false;
+
+                    btnImportarExcel.textContent =
+                        '📥 Importar Excel';
+                }
+            }
+        );
+    }
+
+    await loadVisits();
+}
+
+/* =========================
+   CARGAR VISITAS
+========================= */
+
+async function loadVisits() {
+
+    const list =
+        document.querySelector(
+            '#lista-visitas'
         );
 
+    if (!list) {
         return;
     }
 
-    registrarSeccion.hidden = true;
-    registrarSeccion.classList.add('seccion-oculta');
-    registrarSeccion.style.display = 'none';
+    try {
 
-    if (logout) {
+        const rows =
+            await obtenerVisitas();
 
-        logout.addEventListener(
-            'click',
-            async (e) => {
+        list.innerHTML =
+            rows.length
+                ? rows.map(
+                    row => `
+                        <tr>
 
-                e.preventDefault();
+                            <td>
+                                ${escapeHtml(
+                                    row.dni
+                                )}
+                            </td>
 
-                await signOut();
+                            <td>
+                                ${escapeHtml(
+                                    row.nombre
+                                )}
+                            </td>
 
-                window.location.href =
-                    'index.html';
-            }
-        );
-    }
+                            <td>
+                                ${escapeHtml(
+                                    row.se_entrego ||
+                                    '-'
+                                )}
+                            </td>
 
-    async function loadVisits() {
+                            <td>
+                                ${escapeHtml(
+                                    formatArgentina(
+                                        row.fecha_visita
+                                    )
+                                )}
+                            </td>
 
-        try {
+                            <td>
 
-            const rows =
-                await obtenerVisitas();
+                                <button
+                                    type="button"
+                                    class="boton-editar btn-editar-visita"
 
-            if (count) {
-                count.textContent =
-                    rows.length;
-            }
+                                    data-id="${escapeHtml(
+                                        row.id
+                                    )}"
 
-            if (list) {
+                                    data-dni="${escapeHtml(
+                                        row.dni
+                                    )}"
 
-                list.innerHTML =
-                    rows.length
+                                    data-nombre="${escapeHtml(
+                                        row.nombre
+                                    )}"
 
-                        ? rows.map(row => `
-                            <tr>
+                                    data-se-entrego="${escapeHtml(
+                                        row.se_entrego ||
+                                        ''
+                                    )}"
+                                >
+                                    ✏️ Editar
+                                </button>
 
-                                <td>
-                                    ${escapeHtml(row.dni)}
-                                </td>
+                            </td>
 
-                                <td>
-                                    ${escapeHtml(row.nombre)}
-                                </td>
+                        </tr>
+                    `
+                ).join('')
 
-                                <td>
-                                    ${escapeHtml(row.se_entrego || '-')}
-                                </td>
+                : `
+                    <tr>
+                        <td colspan="5">
+                            No hay visitas registradas.
+                        </td>
+                    </tr>
+                `;
 
-                                <td>
-                                    ${escapeHtml(
-                                        formatArgentina(
-                                            row.fecha_visita
-                                        )
-                                    )}
-                                </td>
+        list
+            .querySelectorAll(
+                '.btn-editar-visita'
+            )
+            .forEach(
+                button => {
 
-                                <td>
-                                    <button
-                                        type="button"
-                                        class="boton-editar btn-editar-visita"
-                                        data-id="${escapeHtml(row.id)}"
-                                        data-dni="${escapeHtml(row.dni)}"
-                                        data-nombre="${escapeHtml(row.nombre)}"
-                                        data-se-entrego="${escapeHtml(row.se_entrego || '')}"
-                                    >
-                                        ✏️ Editar
-                                    </button>
-                                </td>
+                    button.addEventListener(
+                        'click',
+                        () => {
 
-                            </tr>
-                        `).join('')
-
-                        : `
-                            <tr>
-                                <td colspan="5">
-                                    No hay visitas registradas.
-                                </td>
-                            </tr>
-                        `;
-
-                list
-                    .querySelectorAll(
-                        '.btn-editar-visita'
-                    )
-                    .forEach(button => {
-
-                        button.addEventListener(
-                            'click',
-                            () => {
-
-                                mostrarEditorVisita(
-                                    button.dataset.id,
-                                    button.dataset.dni,
-                                    button.dataset.nombre,
-                                    button.dataset.seEntrego
-                                );
-                            }
-                        );
-                    });
-            }
-
-        } catch (error) {
-
-            showMessage(
-                'error',
-                error.message ||
-                'No se pudieron cargar las visitas.'
-            );
-        }
-    }
-
-    function mostrarEditorVisita(
-        id,
-        dni,
-        nombre,
-        seEntrego
-    ) {
-
-        const existente =
-            document.querySelector(
-                '#editor-visita'
+                            mostrarEditorVisita(
+                                button.dataset.id,
+                                button.dataset.dni,
+                                button.dataset.nombre,
+                                button.dataset.seEntrego
+                            );
+                        }
+                    );
+                }
             );
 
-        if (existente) {
-            existente.remove();
-        }
+    } catch (error) {
 
-        const editor =
-            document.createElement(
-                'div'
-            );
-
-        editor.id =
-            'editor-visita';
-
-        editor.className =
-            'resultado';
-
-        editor.innerHTML = `
-
-            <h2>✏️ Editar visita</h2>
-
-            <p>
-                Modificá los datos de la visita.
-            </p>
-
-            <form id="form-editar-visita">
-
-                <input
-                    type="hidden"
-                    id="editar-id"
-                    value="${escapeHtml(id)}"
-                >
-
-                <label for="editar-dni">
-                    DNI:
-                </label>
-
-                <input
-                    type="text"
-                    id="editar-dni"
-                    value="${escapeHtml(dni)}"
-                    maxlength="20"
-                    inputmode="numeric"
-                    pattern="[0-9]+"
-                    required
-                >
-
-                <label for="editar-nombre">
-                    Nombre y apellido:
-                </label>
-
-                <input
-                    type="text"
-                    id="editar-nombre"
-                    value="${escapeHtml(nombre)}"
-                    maxlength="100"
-                    pattern="[A-Za-zÁÉÍÓÚáéíóúÑñÜü ]+"
-                    required
-                >
-
-                <label for="editar-se-entrego">
-                    Se entregó:
-                </label>
-
-                <input
-                    type="text"
-                    id="editar-se-entrego"
-                    value="${escapeHtml(seEntrego || '')}"
-                    maxlength="200"
-                    placeholder="Ingrese lo que se entrego"
-                >
-
-                <div class="acciones-editor-visita">
-
-                    <button
-                        type="submit"
-                        class="boton-editar"
-                        id="guardar-edicion"
-                    >
-                        💾 Guardar cambios
-                    </button>
-
-                    <button
-                        type="button"
-                        id="cancelar-edicion"
-                        class="boton-navegacion"
-                    >
-                        ❌ Cancelar
-                    </button>
-
-                    <button
-                        type="button"
-                        id="eliminar-edicion"
-                        class="boton-eliminar"
-                    >
-                        🗑️ Eliminar
-                    </button>
-
-                </div>
-
-            </form>
+        list.innerHTML = `
+            <tr>
+                <td colspan="5">
+                    <div class="error">
+                        ${escapeHtml(
+                            error.message ||
+                            'No se pudieron cargar las visitas.'
+                        )}
+                    </div>
+                </td>
+            </tr>
         `;
+    }
+}
 
-        const panel =
-            document.querySelector(
-                '.contenedor.grande'
-            );
+/* =========================
+   EDITAR VISITA
+========================= */
 
-        if (panel) {
+function mostrarEditorVisita(
+    id,
+    dni,
+    nombre,
+    seEntrego
+) {
 
-            panel.insertBefore(
-                editor,
-                panel.querySelector('hr')
-            );
-        }
-
-        const form =
-            editor.querySelector(
-                '#form-editar-visita'
-            );
-
-        const dniInput =
-            editor.querySelector(
-                '#editar-dni'
-            );
-
-        const nombreInput =
-            editor.querySelector(
-                '#editar-nombre'
-            );
-
-        const seEntregoInput =
-            editor.querySelector(
-                '#editar-se-entrego'
-            );
-
-        const guardar =
-            editor.querySelector(
-                '#guardar-edicion'
-            );
-
-        const cancelar =
-            editor.querySelector(
-                '#cancelar-edicion'
-            );
-
-        const eliminar =
-            editor.querySelector(
-                '#eliminar-edicion'
-            );
-
-        dniInput.addEventListener(
-            'input',
-            () => {
-
-                dniInput.value =
-                    dniInput.value.replace(
-                        /[^0-9]/g,
-                        ''
-                    );
-            }
+    const contenedor =
+        document.querySelector(
+            '#editor-visita'
         );
 
-        nombreInput.addEventListener(
-            'input',
-            () => {
+    if (!contenedor) {
+        return;
+    }
 
-                nombreInput.value =
-                    nombreInput.value.replace(
-                        /[^A-Za-zÁÉÍÓÚáéíóúÑñÜü ]/g,
-                        ''
-                    );
-            }
+    contenedor.innerHTML = `
+        <div class="editor-visita">
+
+            <h3>
+                ✏️ Editar visita
+            </h3>
+
+            <label for="editar-dni">
+                DNI:
+            </label>
+
+            <input
+                type="text"
+                id="editar-dni"
+                value="${escapeHtml(
+                    dni
+                )}"
+                maxlength="20"
+            >
+
+            <label for="editar-nombre">
+                Nombre y apellido:
+            </label>
+
+            <input
+                type="text"
+                id="editar-nombre"
+                value="${escapeHtml(
+                    nombre
+                )}"
+                maxlength="100"
+            >
+
+            <label for="editar-se-entrego">
+                Se entregó:
+            </label>
+
+            <input
+                type="text"
+                id="editar-se-entrego"
+                value="${escapeHtml(
+                    seEntrego || ''
+                )}"
+                maxlength="200"
+                placeholder="Ingrese lo que se entrego"
+            >
+
+            <div class="editor-botones">
+
+                <button
+                    type="button"
+                    id="guardar-edicion"
+                >
+                    💾 Guardar
+                </button>
+
+                <button
+                    type="button"
+                    id="cancelar-edicion"
+                >
+                    ❌ Cancelar
+                </button>
+
+            </div>
+
+            <div
+                id="mensaje-edicion"
+            ></div>
+
+        </div>
+    `;
+
+    const guardar =
+        document.querySelector(
+            '#guardar-edicion'
         );
+
+    const cancelar =
+        document.querySelector(
+            '#cancelar-edicion'
+        );
+
+    if (cancelar) {
 
         cancelar.addEventListener(
             'click',
             () => {
 
-                editor.remove();
+                contenedor.innerHTML =
+                    '';
             }
         );
+    }
 
-        /* =========================
-           GUARDAR CAMBIOS
-        ========================== */
+    if (guardar) {
 
-        form.addEventListener(
-            'submit',
-            async (event) => {
+        guardar.addEventListener(
+            'click',
+            async () => {
 
-                event.preventDefault();
+                const mensaje =
+                    document.querySelector(
+                        '#mensaje-edicion'
+                    );
+
+                guardar.disabled =
+                    true;
+
+                guardar.textContent =
+                    'Guardando...';
 
                 try {
 
                     const nuevoDni =
                         validarDni(
-                            dniInput.value
+                            document.querySelector(
+                                '#editar-dni'
+                            ).value
                         );
 
                     const nuevoNombre =
                         validarNombre(
-                            nombreInput.value
+                            document.querySelector(
+                                '#editar-nombre'
+                            ).value
                         );
 
                     const nuevoSeEntrego =
                         validarSeEntrego(
-                            seEntregoInput.value
+                            document.querySelector(
+                                '#editar-se-entrego'
+                            ).value
                         );
-
-                    guardar.disabled =
-                        true;
-
-                    cancelar.disabled =
-                        true;
-
-                    eliminar.disabled =
-                        true;
-
-                    guardar.textContent =
-                        'Guardando...';
 
                     await editarVisita(
                         id,
@@ -1920,189 +2244,126 @@ async function initPanel() {
                         nuevoSeEntrego
                     );
 
-                    editor.remove();
+                    if (mensaje) {
 
-                    showMessage(
-                        'exito',
-                        'La visita fue actualizada correctamente.'
-                    );
+                        mensaje.innerHTML =
+                            '<div class="exito">Visita actualizada correctamente.</div>';
+                    }
 
                     await loadVisits();
 
-                } catch (error) {
+                    setTimeout(
+                        () => {
 
-                    const msg =
-                        error.status === 409 ||
-                        error.data?.code === '23505'
+                            contenedor.innerHTML =
+                                '';
 
-                            ? 'Ese DNI ya tiene una visita registrada.'
-
-                            : (
-                                error.message ||
-                                'No se pudo actualizar la visita.'
-                            );
-
-                    showMessage(
-                        'error',
-                        msg
+                        },
+                        800
                     );
 
+                } catch (error) {
+
+                    if (mensaje) {
+
+                        mensaje.innerHTML =
+                            `<div class="error">${escapeHtml(
+                                error.message ||
+                                'No se pudo actualizar la visita.'
+                            )}</div>`;
+                    }
+
                     guardar.disabled =
-                        false;
-
-                    cancelar.disabled =
-                        false;
-
-                    eliminar.disabled =
                         false;
 
                     guardar.textContent =
-                        '💾 Guardar cambios';
+                        '💾 Guardar';
                 }
             }
         );
+    }
+}
 
-        /* =========================
-           ELIMINAR VISITA
-        ========================== */
+/* =========================
+   BUSCAR VISITAS EN PANEL
+========================= */
 
-        eliminar.addEventListener(
-            'click',
-            async () => {
+function initBusquedaPanel() {
 
-                const confirmar =
-                    confirm(
-                        `¿Seguro que querés eliminar la visita de ${nombre} (DNI ${dni})?\n\nEsta acción no se puede deshacer.`
-                    );
-
-                if (!confirmar) {
-                    return;
-                }
-
-                guardar.disabled =
-                    true;
-
-                cancelar.disabled =
-                    true;
-
-                eliminar.disabled =
-                    true;
-
-                eliminar.textContent =
-                    'Eliminando...';
-
-                try {
-
-                    await eliminarVisita(id);
-
-                    editor.remove();
-
-                    showMessage(
-                        'exito',
-                        'La visita fue eliminada correctamente.'
-                    );
-
-                    await loadVisits();
-
-                } catch (error) {
-
-                    showMessage(
-                        'error',
-                        error.message ||
-                        'No se pudo eliminar la visita.'
-                    );
-
-                    guardar.disabled =
-                        false;
-
-                    cancelar.disabled =
-                        false;
-
-                    eliminar.disabled =
-                        false;
-
-                    eliminar.textContent =
-                        '🗑️ Eliminar';
-                }
-            }
+    const form =
+        document.querySelector(
+            '#buscar-dni-form'
         );
 
-        editor.scrollIntoView({
-            behavior: 'smooth',
-            block: 'center'
-        });
-
-        dniInput.focus();
+    if (!form) {
+        return;
     }
 
-    /* =========================
-       BUSCAR DNI
-    ========================== */
+    const resultado =
+        document.querySelector(
+            '#resultado-busqueda'
+        );
 
-    searchForm.addEventListener(
+    form.addEventListener(
         'submit',
-        async (e) => {
+        async event => {
 
-            e.preventDefault();
-
-            clearMessage();
-
-            searchResult.innerHTML =
-                '';
-
-            registrarSeccion.hidden =
-                true;
-
-            registrarSeccion.classList.add(
-                'seccion-oculta'
-            );
-
-            registrarSeccion.style.display =
-                'none';
-
-            const dni =
-                searchForm.dni.value.trim();
+            event.preventDefault();
 
             try {
 
-                const row =
-                    await consultarDni(dni);
+                const dni =
+                    validarDni(
+                        form.dni.value
+                    );
 
-                const esPriset = esPersonaPriset(dni);
+                const visita =
+                    await consultarDni(
+                        dni
+                    );
 
-                if (row) {
+                if (!visita) {
 
-                    searchResult.innerHTML = `
-                        <div class="resultado ya-vino">
+                    if (resultado) {
 
-                            <h2>🔴 ASISTIÓ</h2>
+                        resultado.innerHTML =
+                            '<div class="error">No se encontró ninguna visita con ese DNI.</div>';
+                    }
 
-                            ${
-                                esPriset
-                                    ? `
-                                        <div class="aviso-priset">
-                                            🟡 <strong>RECIBE POR SISTEMA</strong>
-                                        </div>
-                                    `
-                                    : ''
-                            }
+                    return;
+                }
 
-                            <p>
-                                <strong>Nombre:</strong>
-                                ${escapeHtml(row.nombre)}
-                            </p>
+                if (resultado) {
+
+                    resultado.innerHTML = `
+                        <div class="resultado-visita">
+
+                            <h3>
+                                Visita encontrada
+                            </h3>
 
                             <p>
                                 <strong>DNI:</strong>
-                                ${escapeHtml(row.dni)}
+                                ${escapeHtml(
+                                    visita.dni
+                                )}
+                            </p>
+
+                            <p>
+                                <strong>Nombre:</strong>
+                                ${escapeHtml(
+                                    visita.nombre
+                                )}
                             </p>
 
                             ${
-                                row.se_entrego
+                                visita.se_entrego
                                     ? `
                                         <p>
                                             <strong>Se entregó:</strong>
-                                            ${escapeHtml(row.se_entrego)}
+                                            ${escapeHtml(
+                                                visita.se_entrego
+                                            )}
                                         </p>
                                     `
                                     : ''
@@ -2112,592 +2373,378 @@ async function initPanel() {
                                 <strong>Fecha y hora:</strong>
                                 ${escapeHtml(
                                     formatArgentina(
-                                        row.fecha_visita
+                                        visita.fecha_visita
                                     )
                                 )}
                             </p>
 
                         </div>
                     `;
-
-                    return;
                 }
-
-                if (esPriset) {
-
-                    searchResult.innerHTML = `
-                        <div class="resultado priset">
-
-                            <h2>🟡 RECIBE POR SISTEMA</h2>
-
-                            <p>
-                                El DNI
-                                <strong>
-                                    ${escapeHtml(dni)}
-                                </strong>
-                                pertenece al listado PRISET.
-                            </p>
-
-                            <p>
-                                🟡 Esta persona recibe por sistema.
-                            </p>
-
-                            <p>
-                                ⚠️ Para continuar,
-                                <strong>
-                                    tenés que registrar la visita.
-                                </strong>
-                            </p>
-
-                        </div>
-                    `;
-
-                } else {
-
-                    searchResult.innerHTML = `
-                        <div class="resultado no-vino">
-
-                            <h2>🟢 NO ASISTIÓ</h2>
-
-                            <p>
-                                El DNI
-                                <strong>
-                                    ${escapeHtml(dni)}
-                                </strong>
-                                no tiene una visita registrada.
-                            </p>
-
-                            <p>
-                                ⚠️ Para continuar,
-                                <strong>
-                                    tenés que registrar la visita.
-                                </strong>
-                            </p>
-
-                        </div>
-                    `;
-                }
-
-                registerForm.dni.value =
-                    dni;
-
-                registerForm.nombre.value =
-                    '';
-
-                if (registerForm.se_entrego) {
-                    registerForm.se_entrego.value =
-                        '';
-                }
-
-                registrarSeccion.hidden =
-                    false;
-
-                registrarSeccion.classList.remove(
-                    'seccion-oculta'
-                );
-
-                registrarSeccion.style.removeProperty(
-                    'display'
-                );
-
-                registrarSeccion.style.display =
-                    'block';
-
-                setTimeout(() => {
-
-                    registrarSeccion.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'center'
-                    });
-
-                    registerForm.nombre.focus();
-
-                }, 100);
 
             } catch (error) {
 
-                showMessage(
-                    'error',
-                    error.message ||
-                    'No se pudo buscar el DNI.'
-                );
-            }
-        }
-    );
+                if (resultado) {
 
-    /* =========================
-       REGISTRAR VISITA
-    ========================== */
-
-    registerForm.addEventListener(
-        'submit',
-        async (e) => {
-
-            e.preventDefault();
-
-            clearMessage();
-
-            const dni =
-                registerForm.dni.value.trim();
-
-            const nombre =
-                registerForm.nombre.value.trim();
-
-            const seEntrego =
-                registerForm.se_entrego
-                    ? registerForm.se_entrego.value.trim()
-                    : '';
-
-            try {
-
-                validarDni(dni);
-                validarNombre(nombre);
-                validarSeEntrego(seEntrego);
-
-            } catch (error) {
-
-                showMessage(
-                    'error',
-                    error.message
-                );
-
-                return;
-            }
-
-            const button =
-                registerForm.querySelector(
-                    'button[type="submit"]'
-                );
-
-            if (button) {
-
-                button.disabled =
-                    true;
-
-                button.textContent =
-                    'Registrando...';
-            }
-
-            try {
-
-                await registrarVisita(
-                    dni,
-                    nombre,
-                    seEntrego
-                );
-
-                searchResult.innerHTML = `
-                    <div class="resultado exito">
-
-                        <h2>
-                            ✅ ¡ASISTENCIA REGISTRADA CON ÉXITO!
-                        </h2>
-
-                        <p>
-                            La asistencia fue registrada correctamente.
-                        </p>
-
-                        <p>
-                            <strong>Nombre:</strong>
-                            ${escapeHtml(nombre)}
-                        </p>
-
-                        <p>
-                            <strong>DNI:</strong>
-                            ${escapeHtml(dni)}
-                        </p>
-
-                        ${
-                            seEntrego
-                                ? `
-                                    <p>
-                                        <strong>Se entregó:</strong>
-                                        ${escapeHtml(seEntrego)}
-                                    </p>
-                                `
-                                : ''
-                        }
-
-                        <p>
-                            <strong>Fecha y hora:</strong>
-                            ${escapeHtml(
-                                formatArgentina(
-                                    new Date().toISOString()
-                                )
-                            )}
-                        </p>
-
-                    </div>
-                `;
-
-                registerForm.reset();
-
-                registrarSeccion.hidden =
-                    true;
-
-                registrarSeccion.classList.add(
-                    'seccion-oculta'
-                );
-
-                registrarSeccion.style.display =
-                    'none';
-
-                await loadVisits();
-
-            } catch (error) {
-
-                const msg =
-                    error.status === 409 ||
-                    error.data?.code === '23505'
-
-                        ? 'Ese DNI ya tiene una visita registrada.'
-
-                        : (
+                    resultado.innerHTML =
+                        `<div class="error">${escapeHtml(
                             error.message ||
-                            'No se pudo registrar la visita.'
-                        );
-
-                showMessage(
-                    'error',
-                    msg
-                );
-
-            } finally {
-
-                if (button) {
-
-                    button.disabled =
-                        false;
-
-                    button.textContent =
-                        '✅ Registrar visita';
+                            'No se pudo realizar la búsqueda.'
+                        )}</div>`;
                 }
             }
         }
     );
-
-    await loadVisits();
 }
 
 /* =========================
    ADMINISTRADORES
 ========================= */
 
-async function initAdministradores() {
+async function loadAdministradores() {
 
-    if (!requireConfigOrShow()) {
+    const list =
+        document.querySelector(
+            '#lista-administradores'
+        );
+
+    if (!list) {
         return;
     }
 
-    const access =
+    try {
+
+        const rows =
+            await obtenerAdministradores();
+
+        list.innerHTML =
+            rows.length
+                ? rows.map(
+                    row => `
+                        <tr>
+
+                            <td>
+                                ${escapeHtml(
+                                    row.usuario
+                                )}
+                            </td>
+
+                            <td>
+                                ${escapeHtml(
+                                    formatArgentina(
+                                        row.created_at
+                                    )
+                                )}
+                            </td>
+
+                            <td>
+
+                                <button
+                                    type="button"
+                                    class="boton-eliminar-admin"
+                                    data-id="${escapeHtml(
+                                        row.id
+                                    )}"
+                                >
+                                    🗑️ Eliminar
+                                </button>
+
+                            </td>
+
+                        </tr>
+                    `
+                ).join('')
+
+                : `
+                    <tr>
+                        <td colspan="3">
+                            No hay administradores.
+                        </td>
+                    </tr>
+                `;
+
+        list
+            .querySelectorAll(
+                '.boton-eliminar-admin'
+            )
+            .forEach(
+                button => {
+
+                    button.addEventListener(
+                        'click',
+                        async () => {
+
+                            const confirmar =
+                                confirm(
+                                    '¿Seguro que querés eliminar este administrador?'
+                                );
+
+                            if (!confirmar) {
+                                return;
+                            }
+
+                            button.disabled =
+                                true;
+
+                            try {
+
+                                await eliminarAdministrador(
+                                    button.dataset.id
+                                );
+
+                                await loadAdministradores();
+
+                            } catch (error) {
+
+                                alert(
+                                    error.message ||
+                                    'No se pudo eliminar el administrador.'
+                                );
+
+                                button.disabled =
+                                    false;
+                            }
+                        }
+                    );
+                }
+            );
+
+    } catch (error) {
+
+        list.innerHTML = `
+            <tr>
+                <td colspan="3">
+                    <div class="error">
+                        ${escapeHtml(
+                            error.message ||
+                            'No se pudieron cargar los administradores.'
+                        )}
+                    </div>
+                </td>
+            </tr>
+        `;
+    }
+}
+
+async function initAdministradores() {
+
+    const auth =
         await requireAdmin();
 
-    if (!access) return;
-
-    const currentId =
-        access.session.user.id;
-
-    const table =
-        document.querySelector(
-            '#tabla-admins'
-        );
+    if (!auth) {
+        return;
+    }
 
     const form =
         document.querySelector(
             '#crear-admin-form'
         );
 
-    const logout =
-        document.querySelector(
-            '#logout'
-        );
+    if (form) {
 
-    if (logout) {
+        form.addEventListener(
+            'submit',
+            async event => {
 
-        logout.addEventListener(
-            'click',
-            async (e) => {
+                event.preventDefault();
 
-                e.preventDefault();
+                const usuario =
+                    String(
+                        form.usuario.value
+                    )
+                        .trim()
+                        .toLowerCase();
 
-                await signOut();
+                const password =
+                    String(
+                        form.password.value
+                    );
 
-                window.location.href =
-                    'index.html';
-            }
-        );
-    }
+                const confirmar =
+                    String(
+                        form.confirmar_password?.value ||
+                        ''
+                    );
 
-    async function loadAdmins() {
+                const mensaje =
+                    document.querySelector(
+                        '#mensaje-admin'
+                    );
 
-        const admins =
-            await obtenerAdministradores();
+                const button =
+                    form.querySelector(
+                        'button[type="submit"]'
+                    );
 
-        table.innerHTML =
-            admins.map(admin => `
-                <tr>
+                if (
+                    password !==
+                    confirmar
+                ) {
 
-                    <td>
+                    if (mensaje) {
 
-                        ${escapeHtml(admin.usuario)}
-
-                        ${
-                            admin.id === currentId
-                                ? '<strong>(Vos)</strong>'
-                                : ''
-                        }
-
-                    </td>
-
-                    <td>
-
-                        ${
-                            admin.id === currentId
-
-                                ? '<span class="accion-no-disponible">Usuario actual</span>'
-
-                                : `
-                                    <button
-                                        class="boton-eliminar btn-eliminar"
-                                        data-id="${escapeHtml(admin.id)}"
-                                        data-usuario="${escapeHtml(admin.usuario)}"
-                                    >
-                                        🗑️ Eliminar
-                                    </button>
-                                `
-                        }
-
-                    </td>
-
-                </tr>
-            `).join('');
-
-        table
-            .querySelectorAll(
-                '.btn-eliminar'
-            )
-            .forEach(button => {
-
-                button.addEventListener(
-                    'click',
-                    async () => {
-
-                        if (
-                            !confirm(
-                                `¿Seguro que querés eliminar al administrador ${button.dataset.usuario}?`
-                            )
-                        ) {
-                            return;
-                        }
-
-                        button.disabled =
-                            true;
-
-                        try {
-
-                            await eliminarAdministrador(
-                                button.dataset.id
-                            );
-
-                            showMessage(
-                                'exito',
-                                'Administrador eliminado correctamente.'
-                            );
-
-                            await loadAdmins();
-
-                        } catch (error) {
-
-                            showMessage(
-                                'error',
-                                error.message ||
-                                'No se pudo eliminar el administrador.'
-                            );
-
-                            button.disabled =
-                                false;
-                        }
+                        mensaje.innerHTML =
+                            '<div class="error">Las contraseñas no coinciden.</div>';
                     }
-                );
-            });
-    }
 
-    form.addEventListener(
-        'submit',
-        async (e) => {
-
-            e.preventDefault();
-
-            clearMessage();
-
-            if (
-                form.password.value !==
-                form.password2.value
-            ) {
-
-                showMessage(
-                    'error',
-                    'Las contraseñas no coinciden.'
-                );
-
-                return;
-            }
-
-            if (
-                form.password.value.length < 6
-            ) {
-
-                showMessage(
-                    'error',
-                    'La contraseña debe tener al menos 6 caracteres.'
-                );
-
-                return;
-            }
-
-            const button =
-                form.querySelector(
-                    'button'
-                );
-
-            button.disabled =
-                true;
-
-            try {
-
-                await crearAdministrador(
-                    form.usuario.value,
-                    form.password.value
-                );
-
-                showMessage(
-                    'exito',
-                    'Administrador creado correctamente.'
-                );
-
-                form.reset();
-
-                await loadAdmins();
-
-            } catch (error) {
-
-                showMessage(
-                    'error',
-                    error.message ||
-                    'No se pudo crear el administrador.'
-                );
-
-            } finally {
+                    return;
+                }
 
                 button.disabled =
-                    false;
+                    true;
+
+                button.textContent =
+                    'Creando...';
+
+                try {
+
+                    await crearAdministrador(
+                        usuario,
+                        password
+                    );
+
+                    if (mensaje) {
+
+                        mensaje.innerHTML =
+                            '<div class="exito">Administrador creado correctamente.</div>';
+                    }
+
+                    form.reset();
+
+                    await loadAdministradores();
+
+                } catch (error) {
+
+                    if (mensaje) {
+
+                        mensaje.innerHTML =
+                            `<div class="error">${escapeHtml(
+                                error.message ||
+                                'No se pudo crear el administrador.'
+                            )}</div>`;
+                    }
+
+                } finally {
+
+                    button.disabled =
+                        false;
+
+                    button.textContent =
+                        '➕ Crear administrador';
+                }
             }
-        }
-    );
-
-    try {
-
-        await loadAdmins();
-
-    } catch (error) {
-
-        showMessage(
-            'error',
-            error.message ||
-            'No se pudieron cargar los administradores.'
         );
     }
+
+    await loadAdministradores();
 }
 
 /* =========================
    EXPORTAR CSV
 ========================= */
 
-async function initExportar() {
+function escaparCsv(valor) {
 
-    if (!requireConfigOrShow()) {
-        return;
-    }
+    const texto =
+        String(valor ?? '');
 
-    const access =
-        await requireAdmin();
+    return `"${texto.replaceAll(
+        '"',
+        '""'
+    )}"`;
+}
 
-    if (!access) return;
+async function exportarVisitasCSV() {
 
     const rows =
         await obtenerVisitas();
 
-    const csvRows = [
-        [
-            'DNI',
-            'Nombre',
-            'Se entregó',
-            'Fecha',
-            'Hora'
-        ]
+    const encabezado = [
+        'DNI',
+        'Nombre',
+        'Se entregó',
+        'Fecha',
+        'Hora'
     ];
 
-    rows.forEach(row => {
+    const lineas = [
+        encabezado.map(
+            escaparCsv
+        ).join(';')
+    ];
 
-        const date =
-            new Date(
+    rows.forEach(
+        row => {
+
+            const fecha =
                 row.fecha_visita
+                    ? new Date(
+                        row.fecha_visita
+                    )
+                    : null;
+
+            let fechaTexto =
+                '';
+
+            let horaTexto =
+                '';
+
+            if (
+                fecha &&
+                !Number.isNaN(
+                    fecha.getTime()
+                )
+            ) {
+
+                fechaTexto =
+                    new Intl.DateTimeFormat(
+                        'es-AR',
+                        {
+                            timeZone:
+                                'America/Argentina/Buenos_Aires',
+
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric'
+                        }
+                    ).format(fecha);
+
+                horaTexto =
+                    new Intl.DateTimeFormat(
+                        'es-AR',
+                        {
+                            timeZone:
+                                'America/Argentina/Buenos_Aires',
+
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            second: '2-digit',
+
+                            hour12: false
+                        }
+                    ).format(fecha);
+            }
+
+            lineas.push(
+                [
+                    row.dni,
+                    row.nombre,
+                    row.se_entrego || '',
+                    fechaTexto,
+                    horaTexto
+                ]
+                    .map(escaparCsv)
+                    .join(';')
             );
-
-        const fecha =
-            new Intl.DateTimeFormat(
-                'es-AR',
-                {
-                    timeZone:
-                        'America/Argentina/Buenos_Aires',
-
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: 'numeric'
-                }
-            ).format(date);
-
-        const hora =
-            new Intl.DateTimeFormat(
-                'es-AR',
-                {
-                    timeZone:
-                        'America/Argentina/Buenos_Aires',
-
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    second: '2-digit',
-
-                    hour12: false
-                }
-            ).format(date);
-
-        csvRows.push([
-            row.dni,
-            row.nombre,
-            row.se_entrego || '',
-            fecha,
-            hora
-        ]);
-    });
-
-    const csv =
-        '\ufeff' +
-        csvRows
-            .map(
-                cols =>
-                    cols
-                        .map(
-                            v =>
-                                `"${String(v ?? '').replaceAll('"', '""')}"`
-                        )
-                        .join(';')
-            )
-            .join('\r\n');
+        }
+    );
 
     const blob =
         new Blob(
-            [csv],
+            [
+                '\uFEFF' +
+                lineas.join('\r\n')
+            ],
             {
                 type:
                     'text/csv;charset=utf-8;'
@@ -2707,15 +2754,84 @@ async function initExportar() {
     const url =
         URL.createObjectURL(blob);
 
-    const a =
-        document.createElement('a');
+    const enlace =
+        document.createElement(
+            'a'
+        );
 
-    a.href = url;
+    enlace.href =
+        url;
 
-    a.download =
-        `visitas_${new Date().toISOString().slice(0,19).replaceAll(':','-')}.csv`;
+    enlace.download =
+        `visitas-${new Date()
+            .toISOString()
+            .slice(0, 10)}.csv`;
 
-    a.click();
+    document.body.appendChild(
+        enlace
+    );
 
-    URL.revokeObjectURL(url);
+    enlace.click();
+
+    enlace.remove();
+
+    URL.revokeObjectURL(
+        url
+    );
 }
+
+/* =========================
+   INIT GENERAL
+========================= */
+
+document.addEventListener(
+    'DOMContentLoaded',
+    () => {
+
+        const pagina =
+            document.body?.dataset?.pagina ||
+            '';
+
+        if (
+            pagina === 'login' ||
+            document.querySelector(
+                '#login-form'
+            )
+        ) {
+            initLogin();
+        }
+
+        if (
+            pagina === 'recuperar' ||
+            document.querySelector(
+                '#recuperar-form'
+            )
+        ) {
+            initRecuperarPassword();
+        }
+
+        if (
+            pagina === 'invitado' ||
+            document.querySelector(
+                '#buscar-dni-form'
+            )
+        ) {
+            initInvitado();
+        }
+
+        if (
+            pagina === 'administradores' ||
+            document.querySelector(
+                '#crear-admin-form'
+            )
+        ) {
+            initAdministradores();
+        }
+
+        if (
+            pagina === 'index'
+        ) {
+            initIndex();
+        }
+    }
+);
