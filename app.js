@@ -1067,9 +1067,16 @@ async function consultarDni(dni) {
 
 async function obtenerVisitas() {
 
-    return await api(
-        '/rest/v1/visitas?select=id,dni,nombre,se_entrego,fecha_visita&order=fecha_visita.desc'
+    const rows = await api(
+        '/rest/v1/visitas?select=id,dni,nombre,se_entrego,fecha_visita&order=fecha_visita.desc.nullslast'
     );
+
+    return (rows || []).sort((a, b) => {
+        if (!a.fecha_visita && !b.fecha_visita) return 0;
+        if (!a.fecha_visita) return 1;
+        if (!b.fecha_visita) return -1;
+        return new Date(b.fecha_visita) - new Date(a.fecha_visita);
+    });
 }
 
 async function registrarVisita(
