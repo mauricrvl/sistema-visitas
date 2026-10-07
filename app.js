@@ -1479,6 +1479,13 @@ async function initRegistroDiario() {
                         return;
                     }
 
+                    // Un número solo no es un tipo de entrega.
+                    // Evita mostrar valores como 42235374 que quedaron
+                    // guardados por error en el campo se_entrego.
+                    if (/^\d+$/.test(String(nombre).trim())) {
+                        return;
+                    }
+
                     grupos.set(nombre, (grupos.get(nombre) || 0) + cantidad);
                     totalEntregas += cantidad;
                 });
