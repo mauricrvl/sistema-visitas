@@ -1520,7 +1520,7 @@ async function editarVisita(
     const valueSeEntrego = validarSeEntrego(seEntrego);
 
     const visitasActuales = await api(
-        `/rest/v1/visitas?select=id,dni,nombre,fecha_visita&id=eq.${encodeURIComponent(id)}&limit=1`
+        `/rest/v1/visitas?select=id,dni,nombre,fecha_visita,se_entrego&id=eq.${encodeURIComponent(id)}&limit=1`
     );
 
     if (!visitasActuales?.length) {
@@ -1544,49 +1544,56 @@ async function editarVisita(
         }
     );
 
-    /* =========================
-       ACTUALIZAR HISTORIAL
-    ========================= */
+    /*
+       Buscar el registro del historial por DNI anterior y por el mismo día.
+       No usamos igualdad exacta de timestamp porque Supabase puede devolver
+       el timestamp con un formato distinto al guardado originalmente.
+    */
+    if (visitaActual.fecha_visita && visitaActual.dni) {
 
-    if (visitaActual.fecha_visita) {
+        const fecha = new Date(visitaActual.fecha_visita);
 
-        let historial = await api(
-            `/rest/v1/historial_visitas?select=id,dni,nombre,se_entrego,fecha_registro&dni=eq.${encodeURIComponent(visitaActual.dni)}&fecha_registro=eq.${encodeURIComponent(visitaActual.fecha_visita)}&limit=1`
-        );
+        if (!Number.isNaN(fecha.getTime())) {
 
-        /* Si la fecha exacta no coincide por formato,
-           buscamos el registro del mismo DNI dentro del mismo día. */
-        if (!historial?.length) {
-            const fecha = new Date(visitaActual.fecha_visita);
+            const inicio = new Date(fecha);
+            inicio.setHours(0, 0, 0, 0);
 
-            if (!Number.isNaN(fecha.getTime())) {
-                const inicio = new Date(fecha);
-                inicio.setHours(0, 0, 0, 0);
+            const fin = new Date(fecha);
+            fin.setHours(23, 59, 59, 999);
 
-                const fin = new Date(fecha);
-                fin.setHours(23, 59, 59, 999);
+            const historial = await api(
+                `/rest/v1/historial_visitas?select=id,dni,nombre,se_entrego,fecha_registro&dni=eq.${encodeURIComponent(visitaActual.dni)}&fecha_registro=gte.${encodeURIComponent(inicio.toISOString())}&fecha_registro=lte.${encodeURIComponent(fin.toISOString())}&order=fecha_registro.desc&limit=1`
+            );
 
-                historial = await api(
-                    `/rest/v1/historial_visitas?select=id,dni,nombre,se_entrego,fecha_registro&dni=eq.${encodeURIComponent(visitaActual.dni)}&fecha_registro=gte.${encodeURIComponent(inicio.toISOString())}&fecha_registro=lte.${encodeURIComponent(fin.toISOString())}&order=fecha_registro.desc&limit=1`
+            if (historial?.length) {
+
+                await api(
+                    `/rest/v1/historial_visitas?id=eq.${encodeURIComponent(historial[0].id)}`,
+                    {
+                        method: 'PATCH',
+                        headers: {
+                            Prefer: 'return=representation'
+                        },
+                        body: JSON.stringify({
+                            dni: valueDni,
+                            nombre: valueNombre,
+                            se_entrego: valueSeEntrego
+                        })
+                    }
+                );
+
+            } else {
+                /*
+                   Si por alguna razón no existe el historial de esa visita,
+                   lo creamos para que el registro diario quede sincronizado.
+                */
+                await guardarHistorialVisita(
+                    valueDni,
+                    valueNombre,
+                    valueSeEntrego,
+                    visitaActual.fecha_visita
                 );
             }
-        }
-
-        if (historial?.length) {
-            await api(
-                `/rest/v1/historial_visitas?id=eq.${encodeURIComponent(historial[0].id)}`,
-                {
-                    method: 'PATCH',
-                    headers: {
-                        Prefer: 'return=representation'
-                    },
-                    body: JSON.stringify({
-                        dni: valueDni,
-                        nombre: valueNombre,
-                        se_entrego: valueSeEntrego
-                    })
-                }
-            );
         }
     }
 
