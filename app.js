@@ -1433,10 +1433,39 @@ async function initRegistroDiario() {
             let totalEntregas = 0;
 
             rows.forEach(row => {
-                separarEntregas(row.se_entrego).forEach(parte => {
-                    const item = normalizarEntrega(parte);
-                    const nombre = typeof item === 'string' ? item : item.nombre;
-                    const cantidad = typeof item === 'string' ? 1 : item.cantidad;
+
+                const entrega = String(row.se_entrego || '').trim();
+
+                // Si no tiene entrega, sigue contando como persona,
+                // pero no aparece en "Entregas realizadas".
+                if (!entrega) {
+                    return;
+                }
+
+                separarEntregas(entrega).forEach(parte => {
+
+                    const texto = String(parte || '').trim();
+
+                    if (!texto) {
+                        return;
+                    }
+
+                    const item = normalizarEntrega(texto);
+
+                    const nombre =
+                        typeof item === 'string'
+                            ? item
+                            : item.nombre;
+
+                    const cantidad =
+                        typeof item === 'string'
+                            ? 1
+                            : item.cantidad;
+
+                    if (!nombre || nombre === 'SIN ESPECIFICAR') {
+                        return;
+                    }
+
                     grupos.set(nombre, (grupos.get(nombre) || 0) + cantidad);
                     totalEntregas += cantidad;
                 });
