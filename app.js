@@ -1433,24 +1433,10 @@ async function initRegistroDiario() {
             let totalEntregas = 0;
 
             rows.forEach(row => {
-                const entrega = String(row.se_entrego || '').trim();
-
-                // Sin entrega: cuenta como persona, pero no como entrega.
-                if (!entrega) return;
-
-                separarEntregas(entrega).forEach(parte => {
-                    const texto = String(parte || '').trim();
-                    if (!texto) return;
-
-                    // Un número solo no es un tipo de entrega.
-                    if (/^\d+$/.test(texto)) return;
-
-                    const item = normalizarEntrega(texto);
+                separarEntregas(row.se_entrego).forEach(parte => {
+                    const item = normalizarEntrega(parte);
                     const nombre = typeof item === 'string' ? item : item.nombre;
                     const cantidad = typeof item === 'string' ? 1 : item.cantidad;
-
-                    if (!nombre || nombre === 'SIN ESPECIFICAR') return;
-
                     grupos.set(nombre, (grupos.get(nombre) || 0) + cantidad);
                     totalEntregas += cantidad;
                 });
@@ -1514,17 +1500,6 @@ async function initRegistroDiario() {
     });
 
     await cargar();
-
-    // Actualización automática: si se registra, edita o elimina
-    // una visita desde otra página, el registro diario se refresca
-    // sin necesidad de tocar el botón Actualizar.
-    if (!window._registroDiarioAutoRefresh) {
-        window._registroDiarioAutoRefresh = setInterval(() => {
-            if (!document.hidden) {
-                cargar();
-            }
-        }, 3000);
-    }
 }
 
 async function editarVisita(
@@ -1540,29 +1515,25 @@ async function editarVisita(
         );
     }
 
-    const valueDni = validarDni(dni);
-    const valueNombre = validarNombre(nombre);
-    const valueSeEntrego = validarSeEntrego(seEntrego);
+    const valueDni =
+        validarDni(dni);
 
-    // Primero obtenemos los datos anteriores para poder
-    // actualizar también el registro diario correspondiente.
-    const actuales = await api(
-        `/rest/v1/visitas?select=id,dni,nombre,fecha_visita,se_entrego&id=eq.${encodeURIComponent(id)}&limit=1`
-    );
+    const valueNombre =
+        validarNombre(nombre);
 
-    if (!actuales?.length) {
-        throw new Error('No se encontró la visita.');
-    }
+    const valueSeEntrego =
+        validarSeEntrego(seEntrego);
 
-    const anterior = actuales[0];
-
-    const resultado = await api(
+    return await api(
         `/rest/v1/visitas?id=eq.${encodeURIComponent(id)}`,
         {
             method: 'PATCH',
+
             headers: {
-                Prefer: 'return=representation'
+                Prefer:
+                    'return=representation'
             },
+
             body: JSON.stringify({
                 dni: valueDni,
                 nombre: valueNombre,
@@ -1570,49 +1541,6 @@ async function editarVisita(
             })
         }
     );
-
-    // Si la visita tenía fecha, sincronizamos su historial.
-    if (anterior.fecha_visita && anterior.dni) {
-        const fecha = new Date(anterior.fecha_visita);
-
-        if (!Number.isNaN(fecha.getTime())) {
-            const inicio = new Date(fecha);
-            inicio.setHours(0, 0, 0, 0);
-
-            const fin = new Date(fecha);
-            fin.setHours(23, 59, 59, 999);
-
-            const historial = await api(
-                `/rest/v1/historial_visitas?select=id,dni,nombre,se_entrego,fecha_registro&dni=eq.${encodeURIComponent(anterior.dni)}&fecha_registro=gte.${encodeURIComponent(inicio.toISOString())}&fecha_registro=lte.${encodeURIComponent(fin.toISOString())}&order=fecha_registro.desc&limit=1`
-            );
-
-            if (historial?.length) {
-                await api(
-                    `/rest/v1/historial_visitas?id=eq.${encodeURIComponent(historial[0].id)}`,
-                    {
-                        method: 'PATCH',
-                        headers: {
-                            Prefer: 'return=representation'
-                        },
-                        body: JSON.stringify({
-                            dni: valueDni,
-                            nombre: valueNombre,
-                            se_entrego: valueSeEntrego
-                        })
-                    }
-                );
-            } else if (anterior.fecha_visita) {
-                await guardarHistorialVisita(
-                    valueDni,
-                    valueNombre,
-                    valueSeEntrego,
-                    anterior.fecha_visita
-                );
-            }
-        }
-    }
-
-    return resultado;
 }
 
 async function eliminarVisita(id) {
@@ -1623,51 +1551,14 @@ async function eliminarVisita(id) {
         );
     }
 
-    const actuales = await api(
-        `/rest/v1/visitas?select=id,dni,nombre,fecha_visita,se_entrego&id=eq.${encodeURIComponent(id)}&limit=1`
-    );
-
-    if (!actuales?.length) {
-        throw new Error('No se encontró la visita.');
-    }
-
-    const visita = actuales[0];
-
-    // Eliminamos primero el registro correspondiente del historial.
-    if (visita.fecha_visita && visita.dni) {
-        const fecha = new Date(visita.fecha_visita);
-
-        if (!Number.isNaN(fecha.getTime())) {
-            const inicio = new Date(fecha);
-            inicio.setHours(0, 0, 0, 0);
-
-            const fin = new Date(fecha);
-            fin.setHours(23, 59, 59, 999);
-
-            const historial = await api(
-                `/rest/v1/historial_visitas?select=id&dni=eq.${encodeURIComponent(visita.dni)}&fecha_registro=gte.${encodeURIComponent(inicio.toISOString())}&fecha_registro=lte.${encodeURIComponent(fin.toISOString())}&order=fecha_registro.desc&limit=1`
-            );
-
-            if (historial?.length) {
-                await api(
-                    `/rest/v1/historial_visitas?id=eq.${encodeURIComponent(historial[0].id)}`,
-                    {
-                        method: 'DELETE',
-                        headers: {
-                            Prefer: 'return=representation'
-                        }
-                    }
-                );
-            }
-        }
-    }
-
     return await api(
         `/rest/v1/visitas?id=eq.${encodeURIComponent(id)}`,
         {
             method: 'DELETE',
+
             headers: {
-                Prefer: 'return=representation'
+                Prefer:
+                    'return=representation'
             }
         }
     );
@@ -3594,4 +3485,33 @@ async function initExportar() {
     a.click();
 
     URL.revokeObjectURL(url);
+}
+
+
+/* =========================
+   ACTUALIZACION AUTOMATICA
+========================= */
+
+let intervaloRegistroDiario = null;
+
+function iniciarActualizacionAutomaticaRegistroDiario() {
+    if (intervaloRegistroDiario) {
+        clearInterval(intervaloRegistroDiario);
+    }
+
+    intervaloRegistroDiario = setInterval(async () => {
+        if (!document.querySelector('#fecha-registro-diario')) return;
+
+        try {
+            await initRegistroDiario();
+        } catch (error) {
+            console.error('No se pudo actualizar el Registro diario:', error);
+        }
+    }, 5 * 60 * 1000);
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', iniciarActualizacionAutomaticaRegistroDiario, { once: true });
+} else {
+    iniciarActualizacionAutomaticaRegistroDiario();
 }
