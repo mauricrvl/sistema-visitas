@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -6,314 +7,351 @@
     <title>Registro Diario</title>
     <link rel="stylesheet" href="estilos.css">
 
-    <style>
+```
+<style>
 
-        /* =========================
-           PERSONAS QUE ASISTIERON
-           ========================= */
+    /* =========================
+       PERSONAS QUE ASISTIERON
+       ========================= */
 
-        .titulo-desplegable {
-            width: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 15px;
-            cursor: pointer;
-            user-select: none;
-            padding: 14px 16px;
-            margin-top: 25px;
-            border-radius: 10px;
-            background: #202020;
-            border: 1px solid #333;
+    .titulo-desplegable {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 15px;
+        cursor: pointer;
+        user-select: none;
+        padding: 14px 16px;
+        margin-top: 25px;
+        border-radius: 10px;
+        background: #202020;
+        border: 1px solid #333;
+    }
+
+    .titulo-desplegable h2 {
+        margin: 0;
+    }
+
+    .flecha-desplegable {
+        font-size: 22px;
+        transition: transform 0.2s ease;
+    }
+
+    .flecha-desplegable.abierto {
+        transform: rotate(180deg);
+    }
+
+    .contenido-desplegable {
+        display: none;
+        margin-top: 10px;
+    }
+
+    .contenido-desplegable.abierto {
+        display: block;
+    }
+
+
+    /* =========================
+       ENTREGAS
+       ========================= */
+
+    .titulo-entregas {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 15px;
+        margin-top: 25px;
+    }
+
+    .titulo-entregas h2 {
+        margin: 0;
+    }
+
+    .acciones-entregas {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .contador-actualizacion {
+        padding: 9px 13px;
+        border-radius: 8px;
+        background: #202020;
+        border: 1px solid #333;
+        color: #bdbdbd;
+        font-size: 14px;
+        white-space: nowrap;
+    }
+
+    .contador-actualizacion strong {
+        color: #ffffff;
+    }
+
+    .boton-actualizar {
+        padding: 10px 16px;
+        border: 0;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+        background: #2b7cff;
+        color: white;
+    }
+
+    .boton-actualizar:hover {
+        opacity: 0.85;
+    }
+
+    .boton-actualizar:disabled {
+        opacity: 0.6;
+        cursor: wait;
+    }
+
+
+    /* =========================
+       IMPRESION
+       ========================= */
+
+    @media print {
+
+        @page {
+            size: A4;
+            margin: 15mm;
         }
 
-        .titulo-desplegable h2 {
-            margin: 0;
+        body {
+            background: white !important;
+            color: black !important;
+            font-family: Arial, sans-serif !important;
         }
 
-        .flecha-desplegable {
-            font-size: 22px;
-            transition: transform 0.2s ease;
+        .contenedor {
+            width: 100% !important;
+            max-width: none !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            background: white !important;
+            box-shadow: none !important;
         }
 
-        .flecha-desplegable.abierto {
-            transform: rotate(180deg);
+        .menu,
+        .reporte-filtros,
+        #mensaje-registro-diario,
+        .acciones-reporte,
+        .importar-historial,
+        .acciones-panel,
+        hr,
+        .texto-reporte,
+        .encabezado p,
+        .contador-actualizacion {
+            display: none !important;
+        }
+
+        .encabezado {
+            display: block !important;
+            text-align: center !important;
+            margin-bottom: 25px !important;
+            border-bottom: 2px solid #000 !important;
+            padding-bottom: 12px !important;
+        }
+
+        .encabezado h1 {
+            color: black !important;
+            margin: 0 !important;
+            font-size: 24px !important;
+        }
+
+        h2 {
+            color: black !important;
+            font-size: 17px !important;
+            margin-top: 22px !important;
+            margin-bottom: 10px !important;
+        }
+
+        #resumen-registro-diario {
+            display: grid !important;
+            grid-template-columns: repeat(3, 1fr) !important;
+            gap: 10px !important;
+            margin-bottom: 20px !important;
+        }
+
+        #resumen-registro-diario > * {
+            background: white !important;
+            color: black !important;
+            border: 1px solid #999 !important;
+            box-shadow: none !important;
+        }
+
+        .tabla-contenedor {
+            overflow: visible !important;
+            width: 100% !important;
+        }
+
+        .tabla-reporte {
+            width: 100% !important;
+            border-collapse: collapse !important;
+            color: black !important;
+            background: white !important;
+            font-size: 11px !important;
+        }
+
+        .tabla-reporte th {
+            background: #e5e5e5 !important;
+            color: black !important;
+            border: 1px solid #555 !important;
+            padding: 7px !important;
+        }
+
+        .tabla-reporte td {
+            color: black !important;
+            background: white !important;
+            border: 1px solid #999 !important;
+            padding: 6px !important;
+        }
+
+        .tabla-reporte tr {
+            page-break-inside: avoid !important;
+        }
+
+        .tabla-reporte thead {
+            display: table-header-group !important;
         }
 
         .contenido-desplegable {
-            display: none;
-            margin-top: 10px;
+            display: block !important;
+            margin-top: 0 !important;
         }
 
-        .contenido-desplegable.abierto {
-            display: block;
+        .titulo-desplegable {
+            display: block !important;
+            background: white !important;
+            border: none !important;
+            padding: 0 !important;
+            margin-top: 25px !important;
+            cursor: default !important;
         }
 
+        .titulo-desplegable h2 {
+            color: black !important;
+        }
 
-        /* =========================
-           ENTREGAS
-           ========================= */
+        .flecha-desplegable {
+            display: none !important;
+        }
 
         .titulo-entregas {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 15px;
-            margin-top: 25px;
-        }
-
-        .titulo-entregas h2 {
-            margin: 0;
+            display: block !important;
         }
 
         .boton-actualizar {
-            padding: 10px 16px;
-            border: 0;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            background: #2b7cff;
-            color: white;
+            display: none !important;
         }
 
-        .boton-actualizar:hover {
-            opacity: 0.85;
+        .titulo-desplegable,
+        .titulo-entregas,
+        h2 {
+            page-break-after: avoid !important;
         }
 
-        .boton-actualizar:disabled {
-            opacity: 0.6;
-            cursor: wait;
+        .contenedor::after {
+            content: "Registro Diario";
+            display: block;
+            text-align: center;
+            margin-top: 25px;
+            padding-top: 10px;
+            border-top: 1px solid #999;
+            font-size: 10px;
+            color: #555;
         }
+    }
 
+</style>
+```
 
-        /* =========================
-           IMPRESION
-           ========================= */
-
-        @media print {
-
-            @page {
-                size: A4;
-                margin: 15mm;
-            }
-
-            body {
-                background: white !important;
-                color: black !important;
-                font-family: Arial, sans-serif !important;
-            }
-
-            .contenedor {
-                width: 100% !important;
-                max-width: none !important;
-                margin: 0 !important;
-                padding: 0 !important;
-                background: white !important;
-                box-shadow: none !important;
-            }
-
-            .menu,
-            .reporte-filtros,
-            #mensaje-registro-diario,
-            .acciones-reporte,
-            .importar-historial,
-            .acciones-panel,
-            hr,
-            .texto-reporte,
-            .encabezado p {
-                display: none !important;
-            }
-
-            .encabezado {
-                display: block !important;
-                text-align: center !important;
-                margin-bottom: 25px !important;
-                border-bottom: 2px solid #000 !important;
-                padding-bottom: 12px !important;
-            }
-
-            .encabezado h1 {
-                color: black !important;
-                margin: 0 !important;
-                font-size: 24px !important;
-            }
-
-            h2 {
-                color: black !important;
-                font-size: 17px !important;
-                margin-top: 22px !important;
-                margin-bottom: 10px !important;
-            }
-
-            #resumen-registro-diario {
-                display: grid !important;
-                grid-template-columns: repeat(3, 1fr) !important;
-                gap: 10px !important;
-                margin-bottom: 20px !important;
-            }
-
-            #resumen-registro-diario > * {
-                background: white !important;
-                color: black !important;
-                border: 1px solid #999 !important;
-                box-shadow: none !important;
-            }
-
-            .tabla-contenedor {
-                overflow: visible !important;
-                width: 100% !important;
-            }
-
-            .tabla-reporte {
-                width: 100% !important;
-                border-collapse: collapse !important;
-                color: black !important;
-                background: white !important;
-                font-size: 11px !important;
-            }
-
-            .tabla-reporte th {
-                background: #e5e5e5 !important;
-                color: black !important;
-                border: 1px solid #555 !important;
-                padding: 7px !important;
-            }
-
-            .tabla-reporte td {
-                color: black !important;
-                background: white !important;
-                border: 1px solid #999 !important;
-                padding: 6px !important;
-            }
-
-            .tabla-reporte tr {
-                page-break-inside: avoid !important;
-            }
-
-            .tabla-reporte thead {
-                display: table-header-group !important;
-            }
-
-            .contenido-desplegable {
-                display: block !important;
-                margin-top: 0 !important;
-            }
-
-            .titulo-desplegable {
-                display: block !important;
-                background: white !important;
-                border: none !important;
-                padding: 0 !important;
-                margin-top: 25px !important;
-                cursor: default !important;
-            }
-
-            .titulo-desplegable h2 {
-                color: black !important;
-            }
-
-            .flecha-desplegable {
-                display: none !important;
-            }
-
-            .titulo-entregas {
-                display: block !important;
-            }
-
-            .boton-actualizar {
-                display: none !important;
-            }
-
-            .titulo-desplegable,
-            .titulo-entregas,
-            h2 {
-                page-break-after: avoid !important;
-            }
-
-            .contenedor::after {
-                content: "Registro Diario";
-                display: block;
-                text-align: center;
-                margin-top: 25px;
-                padding-top: 10px;
-                border-top: 1px solid #999;
-                font-size: 10px;
-                color: #555;
-            }
-        }
-
-    </style>
 </head>
 
 <body>
 
 <div class="contenedor grande">
 
-    <div class="encabezado">
-        <h1>📊 Registro Diario</h1>
-        <p>
-            Consulta las personas que asistieron y lo que se entregó cada día.
-        </p>
+```
+<div class="encabezado">
+    <h1>📊 Registro Diario</h1>
+    <p>
+        Consulta las personas que asistieron y lo que se entregó cada día.
+    </p>
+</div>
+
+
+<div class="menu">
+
+    <a href="panel.html">📋 Panel</a>
+
+    <a href="administradores.html">👤 Administradores</a>
+
+    <a href="invitado.html">🔎 Consulta invitado</a>
+
+    <a href="index.html">🏠 Inicio</a>
+
+</div>
+
+
+<!-- =========================
+     ELEGIR FECHA
+     ========================= -->
+
+<div class="reporte-filtros">
+
+    <div>
+
+        <label for="fecha-registro-diario">
+            📅 Elegir día
+        </label>
+
+        <input
+            type="date"
+            id="fecha-registro-diario"
+        >
+
     </div>
 
-
-    <div class="menu">
-
-        <a href="panel.html">📋 Panel</a>
-
-        <a href="administradores.html">👤 Administradores</a>
-
-        <a href="invitado.html">🔎 Consulta invitado</a>
-
-        <a href="index.html">🏠 Inicio</a>
-
-    </div>
+</div>
 
 
-    <!-- =========================
-         ELEGIR FECHA
-         ========================= -->
+<div id="mensaje-registro-diario"></div>
 
-    <div class="reporte-filtros">
 
-        <div>
+<!-- =========================
+     RESUMEN
+     ========================= -->
 
-            <label for="fecha-registro-diario">
-                📅 Elegir día
-            </label>
+<h2>Resumen del día</h2>
 
-            <input
-                type="date"
-                id="fecha-registro-diario"
-            >
+<div
+    id="resumen-registro-diario"
+    class="tarjetas reporte-tarjetas"
+></div>
 
+
+<!-- =========================
+     ENTREGAS REALIZADAS
+     ========================= -->
+
+<div class="titulo-entregas">
+
+    <h2>📦 Entregas realizadas</h2>
+
+    <div class="acciones-entregas">
+
+        <div
+            class="contador-actualizacion"
+            id="contador-actualizacion"
+        >
+            🔄 Próxima actualización:
+            <strong id="tiempo-actualizacion">
+                05:00
+            </strong>
         </div>
-
-    </div>
-
-
-    <div id="mensaje-registro-diario"></div>
-
-
-    <!-- =========================
-         RESUMEN
-         ========================= -->
-
-    <h2>Resumen del día</h2>
-
-    <div
-        id="resumen-registro-diario"
-        class="tarjetas reporte-tarjetas"
-    ></div>
-
-
-    <!-- =========================
-         ENTREGAS REALIZADAS
-         ========================= -->
-
-    <div class="titulo-entregas">
-
-        <h2>📦 Entregas realizadas</h2>
 
         <button
             type="button"
@@ -325,6 +363,68 @@
 
     </div>
 
+</div>
+
+
+<div class="tabla-contenedor">
+
+    <table class="tabla-reporte">
+
+        <thead>
+
+            <tr>
+                <th>Tipo de entrega</th>
+                <th>Cantidad</th>
+            </tr>
+
+        </thead>
+
+        <tbody id="resumen-entregas">
+
+            <tr>
+
+                <td colspan="2">
+                    Cargando...
+                </td>
+
+            </tr>
+
+        </tbody>
+
+    </table>
+
+</div>
+
+
+<!-- =========================
+     PERSONAS DESPLEGABLE
+     ========================= -->
+
+<div
+    class="titulo-desplegable"
+    id="boton-personas"
+    role="button"
+    tabindex="0"
+    aria-expanded="false"
+    aria-controls="contenido-personas"
+>
+
+    <h2>👥 Personas que asistieron</h2>
+
+    <span
+        class="flecha-desplegable"
+        id="flecha-personas"
+    >
+        ▼
+    </span>
+
+</div>
+
+
+<div
+    class="contenido-desplegable"
+    id="contenido-personas"
+>
 
     <div class="tabla-contenedor">
 
@@ -333,17 +433,19 @@
             <thead>
 
                 <tr>
-                    <th>Tipo de entrega</th>
-                    <th>Cantidad</th>
+                    <th>DNI</th>
+                    <th>Nombre</th>
+                    <th>Se entregó</th>
+                    <th>Fecha y hora</th>
                 </tr>
 
             </thead>
 
-            <tbody id="resumen-entregas">
+            <tbody id="detalle-registro-diario">
 
                 <tr>
 
-                    <td colspan="2">
+                    <td colspan="4">
                         Cargando...
                     </td>
 
@@ -355,153 +457,257 @@
 
     </div>
 
+</div>
 
-    <!-- =========================
-         PERSONAS DESPLEGABLE
-         ========================= -->
 
-    <div
-        class="titulo-desplegable"
-        id="boton-personas"
-        role="button"
-        tabindex="0"
-        aria-expanded="false"
-        aria-controls="contenido-personas"
+<!-- =========================
+     BOTONES
+     ========================= -->
+
+<div class="acciones-reporte">
+
+    <button
+        type="button"
+        id="btn-imprimir-registro"
     >
-
-        <h2>👥 Personas que asistieron</h2>
-
-        <span
-            class="flecha-desplegable"
-            id="flecha-personas"
-        >
-            ▼
-        </span>
-
-    </div>
+        🖨️ Imprimir
+    </button>
 
 
-    <div
-        class="contenido-desplegable"
-        id="contenido-personas"
+    <button
+        type="button"
+        id="btn-descargar-registro"
+        class="boton-secundario"
     >
-
-        <div class="tabla-contenedor">
-
-            <table class="tabla-reporte">
-
-                <thead>
-
-                    <tr>
-                        <th>DNI</th>
-                        <th>Nombre</th>
-                        <th>Se entregó</th>
-                        <th>Fecha y hora</th>
-                    </tr>
-
-                </thead>
-
-                <tbody id="detalle-registro-diario">
-
-                    <tr>
-
-                        <td colspan="4">
-                            Cargando...
-                        </td>
-
-                    </tr>
-
-                </tbody>
-
-            </table>
-
-        </div>
-
-    </div>
-
-
-    <!-- =========================
-         BOTONES
-         ========================= -->
-
-    <div class="acciones-reporte">
-
-        <button
-            type="button"
-            id="btn-imprimir-registro"
-        >
-            🖨️ Imprimir
-        </button>
-
-
-        <button
-            type="button"
-            id="btn-descargar-registro"
-            class="boton-secundario"
-        >
-            📥 Descargar
-        </button>
-
-    </div>
-
-
-    <hr>
-
-
-    <!-- =========================
-         CARGAR HISTORIAL
-         ========================= -->
-
-    <h2>📥 Cargar historial anterior</h2>
-
-    <p class="texto-reporte">
-        Esta opción se usa una sola vez para cargar el CSV con los 786 registros anteriores.
-    </p>
-
-
-    <div class="importar-historial">
-
-        <input
-            type="file"
-            id="archivo-historial"
-            accept=".csv"
-        >
-
-        <button
-            type="button"
-            id="btn-importar-historial"
-        >
-            📥 Importar historial CSV
-        </button>
-
-    </div>
-
-
-    <div class="acciones-panel">
-
-        <a
-            href="panel.html"
-            class="boton-navegacion"
-        >
-            ⬅️ Volver al panel
-        </a>
-
-    </div>
+        📥 Descargar
+    </button>
 
 </div>
 
 
+<hr>
+
+
+<!-- =========================
+     CARGAR HISTORIAL
+     ========================= -->
+
+<h2>📥 Cargar historial anterior</h2>
+
+<p class="texto-reporte">
+    Esta opción se usa una sola vez para cargar el CSV con los 786 registros anteriores.
+</p>
+
+
+<div class="importar-historial">
+
+    <input
+        type="file"
+        id="archivo-historial"
+        accept=".csv"
+    >
+
+    <button
+        type="button"
+        id="btn-importar-historial"
+    >
+        📥 Importar historial CSV
+    </button>
+
+</div>
+
+
+<div class="acciones-panel">
+
+    <a
+        href="panel.html"
+        class="boton-navegacion"
+    >
+        ⬅️ Volver al panel
+    </a>
+
+</div>
+```
+
+</div>
+
 <script src="supabase-config.js"></script>
+
 <script src="app.js"></script>
 
-
 <script>
+
+    /* =========================
+       CONFIGURACION CONTADOR
+       ========================= */
+
+    const TIEMPO_ACTUALIZACION = 5 * 60;
+
+    let segundosRestantes = TIEMPO_ACTUALIZACION;
+    let intervaloContador = null;
+    let actualizandoAutomaticamente = false;
+
+
+    /* =========================
+       MOSTRAR CONTADOR
+       ========================= */
+
+    function mostrarContador() {
+
+        const elemento =
+            document.getElementById(
+                "tiempo-actualizacion"
+            );
+
+        if (!elemento) {
+            return;
+        }
+
+
+        const minutos =
+            Math.floor(segundosRestantes / 60);
+
+        const segundos =
+            segundosRestantes % 60;
+
+
+        elemento.textContent =
+            String(minutos).padStart(2, "0") +
+            ":" +
+            String(segundos).padStart(2, "0");
+
+    }
+
+
+    /* =========================
+       REINICIAR CONTADOR
+       ========================= */
+
+    function reiniciarContador() {
+
+        segundosRestantes =
+            TIEMPO_ACTUALIZACION;
+
+        mostrarContador();
+
+    }
+
+
+    /* =========================
+       ACTUALIZACION AUTOMATICA
+       ========================= */
+
+    async function actualizarAutomaticamente() {
+
+        if (actualizandoAutomaticamente) {
+            return;
+        }
+
+
+        actualizandoAutomaticamente = true;
+
+
+        try {
+
+            await initRegistroDiario();
+
+            reiniciarContador();
+
+        } catch (error) {
+
+            console.error(
+                "Error en actualización automática:",
+                error
+            );
+
+            /*
+             * Aunque haya un error,
+             * volvemos a comenzar el contador
+             * para intentar nuevamente después.
+             */
+
+            reiniciarContador();
+
+        } finally {
+
+            actualizandoAutomaticamente = false;
+
+        }
+
+    }
+
+
+    /* =========================
+       INICIAR CONTADOR
+       ========================= */
+
+    function iniciarContador() {
+
+        if (intervaloContador) {
+
+            clearInterval(
+                intervaloContador
+            );
+
+        }
+
+
+        reiniciarContador();
+
+
+        intervaloContador =
+            setInterval(
+                async function () {
+
+                    segundosRestantes--;
+
+                    if (
+                        segundosRestantes <= 0
+                    ) {
+
+                        segundosRestantes = 0;
+
+                        mostrarContador();
+
+                        await actualizarAutomaticamente();
+
+                        return;
+
+                    }
+
+
+                    mostrarContador();
+
+                },
+                1000
+            );
+
+    }
+
 
     /* =========================
        INICIAR REGISTRO DIARIO
        ========================= */
 
-    initRegistroDiario();
+    document.addEventListener(
+        "DOMContentLoaded",
+        async function () {
+
+            try {
+
+                await initRegistroDiario();
+
+            } catch (error) {
+
+                console.error(error);
+
+            }
+
+
+            iniciarContador();
+
+        }
+    );
 
 
     /* =========================
@@ -513,24 +719,38 @@
         function () {
 
             const boton =
-                document.getElementById("boton-personas");
+                document.getElementById(
+                    "boton-personas"
+                );
 
             const contenido =
-                document.getElementById("contenido-personas");
+                document.getElementById(
+                    "contenido-personas"
+                );
 
             const flecha =
-                document.getElementById("flecha-personas");
+                document.getElementById(
+                    "flecha-personas"
+                );
 
 
-            if (!boton || !contenido || !flecha) {
+            if (
+                !boton ||
+                !contenido ||
+                !flecha
+            ) {
+
                 return;
+
             }
 
 
             function alternarPersonas() {
 
                 const estaAbierto =
-                    contenido.classList.contains("abierto");
+                    contenido.classList.contains(
+                        "abierto"
+                    );
 
 
                 if (estaAbierto) {
@@ -611,7 +831,9 @@
 
 
             if (!botonActualizar) {
+
                 return;
+
             }
 
 
@@ -623,7 +845,8 @@
                         botonActualizar.innerHTML;
 
 
-                    botonActualizar.disabled = true;
+                    botonActualizar.disabled =
+                        true;
 
                     botonActualizar.innerHTML =
                         "🔄 Actualizando...";
@@ -632,6 +855,9 @@
                     try {
 
                         await initRegistroDiario();
+
+
+                        reiniciarContador();
 
 
                         botonActualizar.innerHTML =
@@ -670,7 +896,8 @@
 
                     } finally {
 
-                        botonActualizar.disabled = false;
+                        botonActualizar.disabled =
+                            false;
 
                     }
 
