@@ -1524,7 +1524,19 @@ async function editarVisita(
     const valueSeEntrego =
         validarSeEntrego(seEntrego);
 
-    return await api(
+    const visitasActuales = await api(
+        `/rest/v1/visitas?select=id,dni,nombre,fecha_visita&id=eq.${encodeURIComponent(id)}&limit=1`
+    );
+
+    if (!visitasActuales?.length) {
+        throw new Error(
+            'No se encontró la visita.'
+        );
+    }
+
+    const visitaActual = visitasActuales[0];
+
+    const actualizada = await api(
         `/rest/v1/visitas?id=eq.${encodeURIComponent(id)}`,
         {
             method: 'PATCH',
@@ -1541,6 +1553,36 @@ async function editarVisita(
             })
         }
     );
+
+    if (visitaActual.fecha_visita) {
+
+        const historial = await api(
+            `/rest/v1/historial_visitas?select=id,dni,nombre,se_entrego,fecha_registro&dni=eq.${encodeURIComponent(visitaActual.dni)}&fecha_registro=eq.${encodeURIComponent(visitaActual.fecha_visita)}&limit=1`
+        );
+
+        if (historial?.length) {
+
+            await api(
+                `/rest/v1/historial_visitas?id=eq.${encodeURIComponent(historial[0].id)}`,
+                {
+                    method: 'PATCH',
+
+                    headers: {
+                        Prefer:
+                            'return=representation'
+                    },
+
+                    body: JSON.stringify({
+                        dni: valueDni,
+                        nombre: valueNombre,
+                        se_entrego: valueSeEntrego
+                    })
+                }
+            );
+        }
+    }
+
+    return actualizada;
 }
 
 async function eliminarVisita(id) {
