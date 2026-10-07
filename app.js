@@ -1608,14 +1608,57 @@ async function eliminarVisita(id) {
         );
     }
 
+    const visitasActuales = await api(
+        `/rest/v1/visitas?select=id,dni,nombre,fecha_visita,se_entrego&id=eq.${encodeURIComponent(id)}&limit=1`
+    );
+
+    if (!visitasActuales?.length) {
+        throw new Error(
+            'No se encontró la visita.'
+        );
+    }
+
+    const visita = visitasActuales[0];
+
+    if (visita.fecha_visita && visita.dni) {
+
+        const fecha = new Date(
+            visita.fecha_visita
+        );
+
+        if (!Number.isNaN(fecha.getTime())) {
+
+            const inicio = new Date(fecha);
+            inicio.setHours(0, 0, 0, 0);
+
+            const fin = new Date(fecha);
+            fin.setHours(23, 59, 59, 999);
+
+            const historial = await api(
+                `/rest/v1/historial_visitas?select=id,dni,nombre,se_entrego,fecha_registro&dni=eq.${encodeURIComponent(visita.dni)}&fecha_registro=gte.${encodeURIComponent(inicio.toISOString())}&fecha_registro=lte.${encodeURIComponent(fin.toISOString())}&order=fecha_registro.desc&limit=1`
+            );
+
+            if (historial?.length) {
+
+                await api(
+                    `/rest/v1/historial_visitas?id=eq.${encodeURIComponent(historial[0].id)}`,
+                    {
+                        method: 'DELETE',
+                        headers: {
+                            Prefer: 'return=representation'
+                        }
+                    }
+                );
+            }
+        }
+    }
+
     return await api(
         `/rest/v1/visitas?id=eq.${encodeURIComponent(id)}`,
         {
             method: 'DELETE',
-
             headers: {
-                Prefer:
-                    'return=representation'
+                Prefer: 'return=representation'
             }
         }
     );
