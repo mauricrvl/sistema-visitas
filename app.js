@@ -1432,18 +1432,39 @@ async function initRegistroDiario() {
             const grupos = new Map();
             let totalEntregas = 0;
 
+            // Evita mostrar entregas que quedaron huérfanas en historial_visitas.
+            const visitasActuales = await api(
+                '/rest/v1/visitas?select=id,dni,nombre,fecha_visita,se_entrego'
+            );
+
+            const visitasPorDni = new Map();
+
+            (visitasActuales || []).forEach(visita => {
+                const dniActual = String(visita.dni || '').trim();
+
+                if (!dniActual || !visita.fecha_visita) {
+                    return;
+                }
+
+                visitasPorDni.set(dniActual, visita);
+            });
+
             rows.forEach(row => {
+                const dni = String(row.dni || '').trim();
+                const visitaActual = visitasPorDni.get(dni);
+
+                // Si ya no existe la visita actual, ignorar el historial huérfano.
+                if (!visitaActual) {
+                    return;
+                }
 
                 const entrega = String(row.se_entrego || '').trim();
 
-                // Si no tiene entrega, sigue contando como persona,
-                // pero no aparece en "Entregas realizadas".
                 if (!entrega) {
                     return;
                 }
 
                 separarEntregas(entrega).forEach(parte => {
-
                     const texto = String(parte || '').trim();
 
                     if (!texto) {
@@ -1451,16 +1472,8 @@ async function initRegistroDiario() {
                     }
 
                     const item = normalizarEntrega(texto);
-
-                    const nombre =
-                        typeof item === 'string'
-                            ? item
-                            : item.nombre;
-
-                    const cantidad =
-                        typeof item === 'string'
-                            ? 1
-                            : item.cantidad;
+                    const nombre = typeof item === 'string' ? item : item.nombre;
+                    const cantidad = typeof item === 'string' ? 1 : item.cantidad;
 
                     if (!nombre || nombre === 'SIN ESPECIFICAR') {
                         return;
@@ -1558,7 +1571,7 @@ async function editarVisita(
 
     const visitaActual = visitasActuales[0];
 
-    const actualizada = await api(
+    const resultado = await api(
         `/rest/v1/visitas?id=eq.${encodeURIComponent(id)}`,
         {
             method: 'PATCH',
@@ -1573,17 +1586,11 @@ async function editarVisita(
         }
     );
 
-    /*
-       Buscar el registro del historial por DNI anterior y por el mismo día.
-       No usamos igualdad exacta de timestamp porque Supabase puede devolver
-       el timestamp con un formato distinto al guardado originalmente.
-    */
+    // Mantener sincronizado el registro diario con la edición de la visita.
     if (visitaActual.fecha_visita && visitaActual.dni) {
-
         const fecha = new Date(visitaActual.fecha_visita);
 
         if (!Number.isNaN(fecha.getTime())) {
-
             const inicio = new Date(fecha);
             inicio.setHours(0, 0, 0, 0);
 
@@ -1595,7 +1602,6 @@ async function editarVisita(
             );
 
             if (historial?.length) {
-
                 await api(
                     `/rest/v1/historial_visitas?id=eq.${encodeURIComponent(historial[0].id)}`,
                     {
@@ -1610,12 +1616,7 @@ async function editarVisita(
                         })
                     }
                 );
-
             } else {
-                /*
-                   Si por alguna razón no existe el historial de esa visita,
-                   lo creamos para que el registro diario quede sincronizado.
-                */
                 await guardarHistorialVisita(
                     valueDni,
                     valueNombre,
@@ -1626,7 +1627,7 @@ async function editarVisita(
         }
     }
 
-    return actualizada;
+    return resultado;
 }
 
 async function eliminarVisita(id) {
@@ -1649,14 +1650,11 @@ async function eliminarVisita(id) {
 
     const visita = visitasActuales[0];
 
+    // Eliminar también su registro del reporte diario.
     if (visita.fecha_visita && visita.dni) {
-
-        const fecha = new Date(
-            visita.fecha_visita
-        );
+        const fecha = new Date(visita.fecha_visita);
 
         if (!Number.isNaN(fecha.getTime())) {
-
             const inicio = new Date(fecha);
             inicio.setHours(0, 0, 0, 0);
 
@@ -1668,7 +1666,6 @@ async function eliminarVisita(id) {
             );
 
             if (historial?.length) {
-
                 await api(
                     `/rest/v1/historial_visitas?id=eq.${encodeURIComponent(historial[0].id)}`,
                     {
