@@ -1748,7 +1748,7 @@ function initInvitado() {
                 const row =
                     await consultarDni(dni);
 
-                if (row && row.fecha_visita) {
+                if (row && row.fecha_visita && asistenciaVigente(row.fecha_visita)) {
 
                     result.innerHTML = `
                         <div class="resultado ya-vino">
@@ -2490,7 +2490,7 @@ async function initPanel() {
                         !row.fecha_visita
                     );
 
-                if (row && row.fecha_visita) {
+                if (row && row.fecha_visita && asistenciaVigente(row.fecha_visita)) {
 
                     searchResult.innerHTML = `
                         <div class="resultado ya-vino">
