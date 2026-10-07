@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="estilos.css">
 
     <style>
+
         /* =========================
            PERSONAS QUE ASISTIERON
            ========================= */
@@ -48,6 +49,43 @@
             display: block;
         }
 
+
+        /* =========================
+           ENTREGAS
+           ========================= */
+
+        .titulo-entregas {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .titulo-entregas h2 {
+            margin: 0;
+        }
+
+        .boton-actualizar {
+            padding: 10px 16px;
+            border: 0;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            background: #2b7cff;
+            color: white;
+        }
+
+        .boton-actualizar:hover {
+            opacity: 0.85;
+        }
+
+        .boton-actualizar:disabled {
+            opacity: 0.6;
+            cursor: wait;
+        }
+
+
         /* =========================
            IMPRESION
            ========================= */
@@ -74,7 +112,6 @@
                 box-shadow: none !important;
             }
 
-            /* Ocultar elementos que no corresponden al informe */
             .menu,
             .reporte-filtros,
             #mensaje-registro-diario,
@@ -101,7 +138,6 @@
                 font-size: 24px !important;
             }
 
-            /* Títulos */
             h2 {
                 color: black !important;
                 font-size: 17px !important;
@@ -109,7 +145,6 @@
                 margin-bottom: 10px !important;
             }
 
-            /* Resumen */
             #resumen-registro-diario {
                 display: grid !important;
                 grid-template-columns: repeat(3, 1fr) !important;
@@ -124,7 +159,6 @@
                 box-shadow: none !important;
             }
 
-            /* Tablas */
             .tabla-contenedor {
                 overflow: visible !important;
                 width: 100% !important;
@@ -160,7 +194,6 @@
                 display: table-header-group !important;
             }
 
-            /* Personas: en impresión siempre se muestran */
             .contenido-desplegable {
                 display: block !important;
                 margin-top: 0 !important;
@@ -183,13 +216,20 @@
                 display: none !important;
             }
 
-            /* Evita que los títulos queden solos al final de una página */
+            .titulo-entregas {
+                display: block !important;
+            }
+
+            .boton-actualizar {
+                display: none !important;
+            }
+
             .titulo-desplegable,
+            .titulo-entregas,
             h2 {
                 page-break-after: avoid !important;
             }
 
-            /* Pie del informe */
             .contenedor::after {
                 content: "Registro Diario";
                 display: block;
@@ -201,6 +241,7 @@
                 color: #555;
             }
         }
+
     </style>
 </head>
 
@@ -210,56 +251,108 @@
 
     <div class="encabezado">
         <h1>📊 Registro Diario</h1>
-        <p>Consulta las personas que asistieron y lo que se entregó cada día.</p>
+        <p>
+            Consulta las personas que asistieron y lo que se entregó cada día.
+        </p>
     </div>
+
 
     <div class="menu">
+
         <a href="panel.html">📋 Panel</a>
+
         <a href="administradores.html">👤 Administradores</a>
+
         <a href="invitado.html">🔎 Consulta invitado</a>
+
         <a href="index.html">🏠 Inicio</a>
+
     </div>
+
+
+    <!-- =========================
+         ELEGIR FECHA
+         ========================= -->
 
     <div class="reporte-filtros">
+
         <div>
-            <label for="fecha-registro-diario">📅 Elegir día</label>
-            <input type="date" id="fecha-registro-diario">
+
+            <label for="fecha-registro-diario">
+                📅 Elegir día
+            </label>
+
+            <input
+                type="date"
+                id="fecha-registro-diario"
+            >
+
         </div>
+
     </div>
 
+
     <div id="mensaje-registro-diario"></div>
+
+
+    <!-- =========================
+         RESUMEN
+         ========================= -->
 
     <h2>Resumen del día</h2>
 
     <div
         id="resumen-registro-diario"
-        class="tarjetas reporte-tarjetas">
+        class="tarjetas reporte-tarjetas"
+    ></div>
+
+
+    <!-- =========================
+         ENTREGAS REALIZADAS
+         ========================= -->
+
+    <div class="titulo-entregas">
+
+        <h2>📦 Entregas realizadas</h2>
+
+        <button
+            type="button"
+            id="btn-actualizar-registro"
+            class="boton-actualizar"
+        >
+            🔄 Actualizar
+        </button>
+
     </div>
 
 
-    <h2>📦 Entregas realizadas</h2>
-
     <div class="tabla-contenedor">
+
         <table class="tabla-reporte">
 
             <thead>
+
                 <tr>
                     <th>Tipo de entrega</th>
                     <th>Cantidad</th>
                 </tr>
+
             </thead>
 
             <tbody id="resumen-entregas">
 
                 <tr>
+
                     <td colspan="2">
                         Cargando...
                     </td>
+
                 </tr>
 
             </tbody>
 
         </table>
+
     </div>
 
 
@@ -298,20 +391,24 @@
             <table class="tabla-reporte">
 
                 <thead>
+
                     <tr>
                         <th>DNI</th>
                         <th>Nombre</th>
                         <th>Se entregó</th>
                         <th>Fecha y hora</th>
                     </tr>
+
                 </thead>
 
                 <tbody id="detalle-registro-diario">
 
                     <tr>
+
                         <td colspan="4">
                             Cargando...
                         </td>
+
                     </tr>
 
                 </tbody>
@@ -336,6 +433,7 @@
             🖨️ Imprimir
         </button>
 
+
         <button
             type="button"
             id="btn-descargar-registro"
@@ -351,7 +449,7 @@
 
 
     <!-- =========================
-         IMPORTAR HISTORIAL
+         CARGAR HISTORIAL
          ========================= -->
 
     <h2>📥 Cargar historial anterior</h2>
@@ -359,6 +457,7 @@
     <p class="texto-reporte">
         Esta opción se usa una sola vez para cargar el CSV con los 786 registros anteriores.
     </p>
+
 
     <div class="importar-historial">
 
@@ -395,7 +494,12 @@
 <script src="supabase-config.js"></script>
 <script src="app.js"></script>
 
+
 <script>
+
+    /* =========================
+       INICIAR REGISTRO DIARIO
+       ========================= */
 
     initRegistroDiario();
 
@@ -404,73 +508,177 @@
        DESPLEGAR PERSONAS
        ========================= */
 
-    document.addEventListener("DOMContentLoaded", function () {
+    document.addEventListener(
+        "DOMContentLoaded",
+        function () {
 
-        const boton = document.getElementById("boton-personas");
-        const contenido = document.getElementById("contenido-personas");
-        const flecha = document.getElementById("flecha-personas");
+            const boton =
+                document.getElementById("boton-personas");
 
-        if (!boton || !contenido || !flecha) {
-            return;
-        }
+            const contenido =
+                document.getElementById("contenido-personas");
 
-
-        function alternarPersonas() {
-
-            const estaAbierto =
-                contenido.classList.contains("abierto");
+            const flecha =
+                document.getElementById("flecha-personas");
 
 
-            if (estaAbierto) {
-
-                contenido.classList.remove("abierto");
-                flecha.classList.remove("abierto");
-
-                boton.setAttribute(
-                    "aria-expanded",
-                    "false"
-                );
-
-            } else {
-
-                contenido.classList.add("abierto");
-                flecha.classList.add("abierto");
-
-                boton.setAttribute(
-                    "aria-expanded",
-                    "true"
-                );
-
+            if (!boton || !contenido || !flecha) {
+                return;
             }
 
-        }
+
+            function alternarPersonas() {
+
+                const estaAbierto =
+                    contenido.classList.contains("abierto");
 
 
-        boton.addEventListener(
-            "click",
-            alternarPersonas
-        );
+                if (estaAbierto) {
 
+                    contenido.classList.remove(
+                        "abierto"
+                    );
 
-        boton.addEventListener(
-            "keydown",
-            function (event) {
+                    flecha.classList.remove(
+                        "abierto"
+                    );
 
-                if (
-                    event.key === "Enter" ||
-                    event.key === " "
-                ) {
+                    boton.setAttribute(
+                        "aria-expanded",
+                        "false"
+                    );
 
-                    event.preventDefault();
+                } else {
 
-                    alternarPersonas();
+                    contenido.classList.add(
+                        "abierto"
+                    );
+
+                    flecha.classList.add(
+                        "abierto"
+                    );
+
+                    boton.setAttribute(
+                        "aria-expanded",
+                        "true"
+                    );
 
                 }
 
             }
-        );
 
-    });
+
+            boton.addEventListener(
+                "click",
+                alternarPersonas
+            );
+
+
+            boton.addEventListener(
+                "keydown",
+                function (event) {
+
+                    if (
+                        event.key === "Enter" ||
+                        event.key === " "
+                    ) {
+
+                        event.preventDefault();
+
+                        alternarPersonas();
+
+                    }
+
+                }
+            );
+
+        }
+    );
+
+
+    /* =========================
+       BOTON ACTUALIZAR
+       ========================= */
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        function () {
+
+            const botonActualizar =
+                document.getElementById(
+                    "btn-actualizar-registro"
+                );
+
+
+            if (!botonActualizar) {
+                return;
+            }
+
+
+            botonActualizar.addEventListener(
+                "click",
+                async function () {
+
+                    const textoOriginal =
+                        botonActualizar.innerHTML;
+
+
+                    botonActualizar.disabled = true;
+
+                    botonActualizar.innerHTML =
+                        "🔄 Actualizando...";
+
+
+                    try {
+
+                        await initRegistroDiario();
+
+
+                        botonActualizar.innerHTML =
+                            "✅ Actualizado";
+
+
+                        setTimeout(
+                            function () {
+
+                                botonActualizar.innerHTML =
+                                    textoOriginal;
+
+                            },
+                            1500
+                        );
+
+
+                    } catch (error) {
+
+                        console.error(error);
+
+
+                        botonActualizar.innerHTML =
+                            "❌ Error";
+
+
+                        setTimeout(
+                            function () {
+
+                                botonActualizar.innerHTML =
+                                    textoOriginal;
+
+                            },
+                            2000
+                        );
+
+                    } finally {
+
+                        botonActualizar.disabled = false;
+
+                    }
+
+                }
+            );
+
+        }
+    );
 
 </script>
 
