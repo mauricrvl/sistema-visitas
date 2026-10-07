@@ -1515,23 +1515,16 @@ async function editarVisita(
         );
     }
 
-    const valueDni =
-        validarDni(dni);
-
-    const valueNombre =
-        validarNombre(nombre);
-
-    const valueSeEntrego =
-        validarSeEntrego(seEntrego);
+    const valueDni = validarDni(dni);
+    const valueNombre = validarNombre(nombre);
+    const valueSeEntrego = validarSeEntrego(seEntrego);
 
     const visitasActuales = await api(
         `/rest/v1/visitas?select=id,dni,nombre,fecha_visita&id=eq.${encodeURIComponent(id)}&limit=1`
     );
 
     if (!visitasActuales?.length) {
-        throw new Error(
-            'No se encontró la visita.'
-        );
+        throw new Error('No se encontró la visita.');
     }
 
     const visitaActual = visitasActuales[0];
@@ -1540,12 +1533,9 @@ async function editarVisita(
         `/rest/v1/visitas?id=eq.${encodeURIComponent(id)}`,
         {
             method: 'PATCH',
-
             headers: {
-                Prefer:
-                    'return=representation'
+                Prefer: 'return=representation'
             },
-
             body: JSON.stringify({
                 dni: valueDni,
                 nombre: valueNombre,
@@ -1554,24 +1544,42 @@ async function editarVisita(
         }
     );
 
+    /* =========================
+       ACTUALIZAR HISTORIAL
+    ========================= */
+
     if (visitaActual.fecha_visita) {
 
-        const historial = await api(
+        let historial = await api(
             `/rest/v1/historial_visitas?select=id,dni,nombre,se_entrego,fecha_registro&dni=eq.${encodeURIComponent(visitaActual.dni)}&fecha_registro=eq.${encodeURIComponent(visitaActual.fecha_visita)}&limit=1`
         );
 
-        if (historial?.length) {
+        /* Si la fecha exacta no coincide por formato,
+           buscamos el registro del mismo DNI dentro del mismo día. */
+        if (!historial?.length) {
+            const fecha = new Date(visitaActual.fecha_visita);
 
+            if (!Number.isNaN(fecha.getTime())) {
+                const inicio = new Date(fecha);
+                inicio.setHours(0, 0, 0, 0);
+
+                const fin = new Date(fecha);
+                fin.setHours(23, 59, 59, 999);
+
+                historial = await api(
+                    `/rest/v1/historial_visitas?select=id,dni,nombre,se_entrego,fecha_registro&dni=eq.${encodeURIComponent(visitaActual.dni)}&fecha_registro=gte.${encodeURIComponent(inicio.toISOString())}&fecha_registro=lte.${encodeURIComponent(fin.toISOString())}&order=fecha_registro.desc&limit=1`
+                );
+            }
+        }
+
+        if (historial?.length) {
             await api(
                 `/rest/v1/historial_visitas?id=eq.${encodeURIComponent(historial[0].id)}`,
                 {
                     method: 'PATCH',
-
                     headers: {
-                        Prefer:
-                            'return=representation'
+                        Prefer: 'return=representation'
                     },
-
                     body: JSON.stringify({
                         dni: valueDni,
                         nombre: valueNombre,
