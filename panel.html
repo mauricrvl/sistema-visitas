@@ -62,6 +62,10 @@
             🔎 Consulta invitado
         </a>
 
+        <a href="registro-diario.html">
+            📊 Registro diario
+        </a>
+
         <a href="#" id="logout">
             🚪 Cerrar sesión
         </a>
@@ -197,13 +201,18 @@
     ========================== -->
 
     <div class="importar-excel">
-        <h2>📥 Importar visitas desde Excel</h2>
+
+        <h2>
+            📥 Importar visitas desde Excel
+        </h2>
+
 
         <input
             type="file"
             id="archivo-excel"
             accept=".xlsx,.xls"
         >
+
 
         <button
             type="button"
@@ -212,7 +221,9 @@
             📥 Importar Excel
         </button>
 
+
         <div id="resultado-importacion"></div>
+
     </div>
 
 
@@ -294,6 +305,14 @@
 
 
         <a
+            href="registro-diario.html"
+            class="boton-navegacion"
+        >
+            📊 Registro diario
+        </a>
+
+
+        <a
             href="exportar.html"
             class="boton-navegacion"
         >
@@ -315,7 +334,9 @@
 
 <script src="supabase-config.js"></script>
 
+
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
 
 <script src="app.js"></script>
 
