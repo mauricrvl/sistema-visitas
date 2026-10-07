@@ -1266,3 +1266,169 @@ button:disabled {
 .resultado.priset span {
     color: #f5d76e !important;
 }
+/* =========================================
+   REGISTRO DIARIO
+========================================= */
+
+.reporte-filtros {
+    display: flex;
+    gap: 15px;
+    align-items: flex-end;
+    margin-top: 20px;
+    padding: 18px;
+    background: #202020;
+    border: 1px solid #333333;
+    border-radius: 8px;
+}
+
+.reporte-filtros > div {
+    width: 100%;
+    max-width: 320px;
+}
+
+.reporte-filtros input {
+    margin-bottom: 0;
+}
+
+.reporte-tarjetas {
+    grid-template-columns: repeat(3, 1fr);
+    margin-top: 15px;
+}
+
+.reporte-principal strong {
+    display: block;
+    color: #ffffff;
+    font-size: 28px;
+    margin-top: 5px;
+}
+
+.reporte-principal h3 {
+    color: #aaaaaa;
+    font-size: 13px;
+}
+
+.tabla-reporte {
+    min-width: 650px;
+}
+
+.tabla-reporte td strong {
+    color: #ffffff;
+}
+
+.acciones-reporte {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.acciones-reporte button {
+    flex: 1;
+}
+
+.importar-historial {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    padding: 18px;
+    background: #202020;
+    border: 1px solid #333333;
+    border-radius: 8px;
+}
+
+.importar-historial input {
+    flex: 1;
+    margin-bottom: 0;
+}
+
+.importar-historial button {
+    width: auto;
+    white-space: nowrap;
+}
+
+.texto-reporte {
+    margin-top: 0;
+}
+
+@media (max-width: 600px) {
+    .reporte-tarjetas {
+        grid-template-columns: 1fr;
+    }
+
+    .reporte-filtros {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .reporte-filtros > div {
+        max-width: none;
+    }
+
+    .acciones-reporte {
+        flex-direction: column;
+    }
+
+    .importar-historial {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .importar-historial button {
+        width: 100%;
+    }
+}
+
+@media print {
+    body {
+        background: #ffffff !important;
+        color: #000000 !important;
+        padding: 0;
+    }
+
+    .contenedor {
+        max-width: none !important;
+        margin: 0 !important;
+        padding: 10px !important;
+        background: #ffffff !important;
+        border: 0 !important;
+        box-shadow: none !important;
+    }
+
+    .menu,
+    .reporte-filtros,
+    .acciones-reporte,
+    .importar-historial,
+    .acciones-panel,
+    .contenedor > hr,
+    .contenedor > h2:last-of-type,
+    .texto-reporte,
+    #mensaje-registro-diario {
+        display: none !important;
+    }
+
+    h1,
+    h2,
+    h3,
+    p,
+    th,
+    td,
+    strong {
+        color: #000000 !important;
+    }
+
+    table {
+        background: #ffffff !important;
+    }
+
+    th {
+        background: #eeeeee !important;
+    }
+
+    th,
+    td {
+        border-color: #cccccc !important;
+    }
+
+    tr:hover td {
+        background: transparent !important;
+    }
+}
