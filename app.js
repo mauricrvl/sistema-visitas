@@ -1079,6 +1079,50 @@ async function obtenerVisitas() {
     });
 }
 
+function asistenciaVigente(fechaVisita) {
+
+    if (!fechaVisita) return false;
+
+    const fecha = new Date(fechaVisita);
+
+    if (Number.isNaN(fecha.getTime())) return false;
+
+    const vencimiento = new Date(
+        fecha.getFullYear(),
+        fecha.getMonth() + 1,
+        fecha.getDate(),
+        fecha.getHours(),
+        fecha.getMinutes(),
+        fecha.getSeconds()
+    );
+
+    return new Date() < vencimiento;
+}
+
+async function guardarHistorialVisita(
+    dni,
+    nombre,
+    seEntrego,
+    fechaRegistro = new Date().toISOString()
+) {
+
+    return await api(
+        '/rest/v1/historial_visitas',
+        {
+            method: 'POST',
+            headers: {
+                Prefer: 'return=representation'
+            },
+            body: JSON.stringify({
+                dni: String(dni),
+                nombre: String(nombre),
+                se_entrego: seEntrego || null,
+                fecha_registro: fechaRegistro
+            })
+        }
+    );
+}
+
 async function registrarVisita(
     dni,
     nombre,
@@ -1094,58 +1138,368 @@ async function registrarVisita(
     const valueSeEntrego =
         validarSeEntrego(seEntrego);
 
-    // Si el DNI ya existe como persona importada de PRISET
-    // (sin fecha de visita), se convierte en una visita.
     const existentes = await api(
         `/rest/v1/visitas?select=id,dni,nombre,cuil,fecha_visita&dni=eq.${encodeURIComponent(valueDni)}&limit=1`
     );
+
+    const ahora = new Date().toISOString();
 
     if (existentes?.length) {
 
         const existente = existentes[0];
 
-        if (existente.fecha_visita) {
+        if (existente.fecha_visita && asistenciaVigente(existente.fecha_visita)) {
             throw new Error(
                 'Ese DNI ya tiene una visita registrada.'
             );
         }
 
-        return await api(
+        const actualizada = await api(
             `/rest/v1/visitas?id=eq.${encodeURIComponent(existente.id)}`,
             {
                 method: 'PATCH',
-
                 headers: {
-                    Prefer:
-                        'return=representation'
+                    Prefer: 'return=representation'
                 },
-
                 body: JSON.stringify({
                     nombre: valueNombre,
                     se_entrego: valueSeEntrego,
-                    fecha_visita: new Date().toISOString()
+                    fecha_visita: ahora
                 })
             }
         );
+
+        await guardarHistorialVisita(
+            valueDni,
+            valueNombre,
+            valueSeEntrego,
+            ahora
+        );
+
+        return actualizada;
     }
 
-    return await api(
+    const nueva = await api(
         '/rest/v1/visitas',
         {
             method: 'POST',
-
             headers: {
-                Prefer:
-                    'return=representation'
+                Prefer: 'return=representation'
             },
-
             body: JSON.stringify({
                 dni: valueDni,
                 nombre: valueNombre,
-                se_entrego: valueSeEntrego
+                se_entrego: valueSeEntrego,
+                fecha_visita: ahora
             })
         }
     );
+
+    await guardarHistorialVisita(
+        valueDni,
+        valueNombre,
+        valueSeEntrego,
+        ahora
+    );
+
+    return nueva;
+}
+
+function normalizarEntrega(texto) {
+
+    let valor = String(texto || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toUpperCase()
+        .trim()
+        .replace(/\s+/g, ' ');
+
+    if (!valor) return 'SIN ESPECIFICAR';
+
+    const cantidad = valor.match(/^(\d+)\s+/);
+    const numero = cantidad ? Number(cantidad[1]) : 1;
+    const base = valor.replace(/^\d+\s+/, '');
+
+    if (/GAS.*15\s*KG|GAS.*15KG|GAS DE 15/.test(base)) {
+        return { nombre: 'GAS 15 KG', cantidad: numero };
+    }
+
+    if (/GAS.*10\s*KG|GAS.*10KG|GAS DE 10/.test(base)) {
+        return { nombre: 'GAS 10 KG', cantidad: numero };
+    }
+
+    if (/BOLSON/.test(base)) {
+        return { nombre: 'BOLSON', cantidad: numero };
+    }
+
+    if (/MODULO/.test(base)) {
+        return { nombre: 'MODULO', cantidad: numero };
+    }
+
+    if (/LECHE/.test(base)) {
+        return { nombre: 'LECHE', cantidad: numero };
+    }
+
+    if (/PUERTA/.test(base)) {
+        return { nombre: 'PUERTA', cantidad: numero };
+    }
+
+    const importe = base.match(/(20|30|35|80)\s*MIL/);
+    if (importe && /ORDEN|AYUDA/.test(base)) {
+        const tipo = /AYUDA/.test(base) ? 'AYUDA ECONOMICA' : 'ORDEN DE COMPRA';
+        return { nombre: `${tipo} ${importe[1]} MIL`, cantidad: numero };
+    }
+
+    if (/MERCADERIA/.test(base)) {
+        return { nombre: 'MERCADERIA', cantidad: numero };
+    }
+
+    return { nombre: base, cantidad: numero };
+}
+
+function separarEntregas(texto) {
+    return String(texto || '')
+        .split('+')
+        .map(parte => parte.trim())
+        .filter(Boolean);
+}
+
+function fechaArgentinaISO(dia) {
+    const partes = String(dia || '').split('-').map(Number);
+    if (partes.length !== 3 || partes.some(Number.isNaN)) return null;
+    return `${String(partes[0]).padStart(4, '0')}-${String(partes[1]).padStart(2, '0')}-${String(partes[2]).padStart(2, '0')}`;
+}
+
+async function obtenerHistorialDia(dia) {
+    const fecha = fechaArgentinaISO(dia);
+    if (!fecha) throw new Error('Seleccioná una fecha válida.');
+
+    const inicio = `${fecha}T00:00:00-03:00`;
+    const fin = `${fecha}T23:59:59.999-03:00`;
+
+    return await api(
+        `/rest/v1/historial_visitas?select=id,dni,nombre,se_entrego,fecha_registro&fecha_registro=gte.${encodeURIComponent(inicio)}&fecha_registro=lte.${encodeURIComponent(fin)}&order=fecha_registro.asc`
+    );
+}
+
+function csvEscape(valor) {
+    const texto = String(valor ?? '');
+    return `"${texto.replace(/"/g, '""')}"`;
+}
+
+function descargarArchivo(nombre, contenido, tipo = 'text/csv;charset=utf-8') {
+    const blob = new Blob([contenido], { type: tipo });
+    const url = URL.createObjectURL(blob);
+    const enlace = document.createElement('a');
+    enlace.href = url;
+    enlace.download = nombre;
+    document.body.appendChild(enlace);
+    enlace.click();
+    enlace.remove();
+    URL.revokeObjectURL(url);
+}
+
+async function importarHistorialCSV(archivo) {
+
+    if (!archivo) throw new Error('Seleccioná el archivo CSV.');
+
+    const texto = await archivo.text();
+    const lineas = texto.split(/\r?\n/).filter(linea => linea.trim());
+
+    if (!lineas.length) throw new Error('El CSV está vacío.');
+
+    const parseCSVLinea = linea => {
+        const resultado = [];
+        let actual = '';
+        let comillas = false;
+        for (let i = 0; i < linea.length; i++) {
+            const caracter = linea[i];
+            if (caracter === '"') {
+                if (comillas && linea[i + 1] === '"') {
+                    actual += '"';
+                    i++;
+                } else {
+                    comillas = !comillas;
+                }
+            } else if (caracter === ';' && !comillas) {
+                resultado.push(actual.trim());
+                actual = '';
+            } else {
+                actual += caracter;
+            }
+        }
+        resultado.push(actual.trim());
+        return resultado;
+    };
+
+    const encabezados = parseCSVLinea(lineas[0]).map(normalizarEncabezadoExcel);
+    const indice = nombre => encabezados.indexOf(normalizarEncabezadoExcel(nombre));
+
+    const iDni = indice('DNI');
+    const iNombre = indice('NOMBRE');
+    const iEntrega = indice('SE ENTREGO');
+    const iFecha = indice('FECHA');
+    const iHora = indice('HORA');
+
+    if (iDni < 0 || iNombre < 0 || iEntrega < 0 || iFecha < 0 || iHora < 0) {
+        throw new Error('El CSV debe tener las columnas DNI, Nombre, Se entregó, Fecha y Hora.');
+    }
+
+    const registros = [];
+
+    for (let i = 1; i < lineas.length; i++) {
+        const columnas = parseCSVLinea(lineas[i]);
+        const dni = String(columnas[iDni] || '').replace(/\D/g, '');
+        const nombre = String(columnas[iNombre] || '').trim();
+        const entrega = String(columnas[iEntrega] || '').trim();
+        const fecha = String(columnas[iFecha] || '').trim();
+        const hora = String(columnas[iHora] || '').trim();
+
+        if (!dni || !nombre || !fecha || !hora) continue;
+
+        const partes = fecha.split('/');
+        if (partes.length !== 3) continue;
+
+        const iso = `${partes[2]}-${String(partes[1]).padStart(2, '0')}-${String(partes[0]).padStart(2, '0')}T${hora}-03:00`;
+
+        if (Number.isNaN(new Date(iso).getTime())) continue;
+
+        registros.push({
+            dni,
+            nombre,
+            se_entrego: entrega || null,
+            fecha_registro: iso
+        });
+    }
+
+    const existentes = await api(
+        '/rest/v1/historial_visitas?select=dni,fecha_registro&limit=10000'
+    );
+
+    const clavesExistentes = new Set(
+        (existentes || []).map(row => `${row.dni}|${row.fecha_registro}`)
+    );
+
+    const nuevos = registros.filter(row => {
+        const clave = `${row.dni}|${row.fecha_registro}`;
+        if (clavesExistentes.has(clave)) return false;
+        clavesExistentes.add(clave);
+        return true;
+    });
+
+    let importados = 0;
+
+    for (let i = 0; i < nuevos.length; i += 100) {
+        const bloque = nuevos.slice(i, i + 100);
+        await api('/rest/v1/historial_visitas', {
+            method: 'POST',
+            headers: {
+                Prefer: 'return=minimal'
+            },
+            body: JSON.stringify(bloque)
+        });
+        importados += bloque.length;
+    }
+
+    return {
+        importados,
+        repetidos: registros.length - nuevos.length,
+        omitidos: lineas.length - 1 - registros.length
+    };
+}
+
+async function initRegistroDiario() {
+
+    if (!requireConfigOrShow()) return;
+
+    const access = await requireAdmin();
+    if (!access) return;
+
+    const fecha = document.querySelector('#fecha-registro-diario');
+    const tabla = document.querySelector('#detalle-registro-diario');
+    const resumen = document.querySelector('#resumen-registro-diario');
+    const entregas = document.querySelector('#resumen-entregas');
+    const mensaje = document.querySelector('#mensaje-registro-diario');
+    const archivo = document.querySelector('#archivo-historial');
+    const botonImportar = document.querySelector('#btn-importar-historial');
+
+    const hoy = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' }).format(new Date());
+    if (fecha && !fecha.value) fecha.value = hoy;
+
+    async function cargar() {
+        try {
+            const rows = await obtenerHistorialDia(fecha.value);
+            const grupos = new Map();
+            let totalEntregas = 0;
+
+            rows.forEach(row => {
+                separarEntregas(row.se_entrego).forEach(parte => {
+                    const item = normalizarEntrega(parte);
+                    const nombre = typeof item === 'string' ? item : item.nombre;
+                    const cantidad = typeof item === 'string' ? 1 : item.cantidad;
+                    grupos.set(nombre, (grupos.get(nombre) || 0) + cantidad);
+                    totalEntregas += cantidad;
+                });
+            });
+
+            resumen.innerHTML = `
+                <div class="tarjeta reporte-principal"><h3>PERSONAS QUE VINIERON</h3><strong>${rows.length}</strong></div>
+                <div class="tarjeta reporte-principal"><h3>TOTAL DE ENTREGAS</h3><strong>${totalEntregas}</strong></div>
+                <div class="tarjeta reporte-principal"><h3>TIPOS DE ENTREGA</h3><strong>${grupos.size}</strong></div>
+            `;
+
+            entregas.innerHTML = grupos.size ? [...grupos.entries()].sort((a,b) => b[1]-a[1]).map(([nombre,cantidad]) => `
+                <tr><td>${escapeHtml(nombre)}</td><td><strong>${cantidad}</strong></td></tr>
+            `).join('') : '<tr><td colspan="2">No hay entregas registradas.</td></tr>';
+
+            tabla.innerHTML = rows.length ? rows.map(row => `
+                <tr>
+                    <td>${escapeHtml(row.dni)}</td>
+                    <td>${escapeHtml(row.nombre)}</td>
+                    <td>${escapeHtml(row.se_entrego || '-')}</td>
+                    <td>${escapeHtml(formatArgentina(row.fecha_registro))}</td>
+                </tr>
+            `).join('') : '<tr><td colspan="4">No hay personas registradas para este día.</td></tr>';
+
+            window._registroDiarioActual = rows;
+            window._entregasDiarias = grupos;
+
+            if (mensaje) mensaje.innerHTML = '';
+        } catch (error) {
+            if (mensaje) mensaje.innerHTML = `<div class="error">${escapeHtml(error.message || 'No se pudo cargar el registro.')}</div>`;
+        }
+    }
+
+    fecha?.addEventListener('change', cargar);
+
+    document.querySelector('#btn-imprimir-registro')?.addEventListener('click', () => window.print());
+
+    document.querySelector('#btn-descargar-registro')?.addEventListener('click', () => {
+        const rows = window._registroDiarioActual || [];
+        const contenido = [
+            ['DNI','Nombre','Se entregó','Fecha y hora'].map(csvEscape).join(';'),
+            ...rows.map(row => [row.dni,row.nombre,row.se_entrego || '',formatArgentina(row.fecha_registro)].map(csvEscape).join(';'))
+        ].join('\n');
+        descargarArchivo(`registro_diario_${fecha.value}.csv`, '\ufeff' + contenido);
+    });
+
+    botonImportar?.addEventListener('click', async () => {
+        try {
+            botonImportar.disabled = true;
+            botonImportar.textContent = 'Importando...';
+            const resultado = await importarHistorialCSV(archivo.files?.[0]);
+            if (mensaje) mensaje.innerHTML = `<div class="exito">Se importaron ${resultado.importados} registros. ${resultado.repetidos} ya estaban cargados y ${resultado.omitidos} filas fueron omitidas.</div>`;
+            archivo.value = '';
+            await cargar();
+        } catch (error) {
+            if (mensaje) mensaje.innerHTML = `<div class="error">${escapeHtml(error.message || 'No se pudo importar el historial.')}</div>`;
+        } finally {
+            botonImportar.disabled = false;
+            botonImportar.textContent = '📥 Importar historial CSV';
+        }
+    });
+
+    await cargar();
 }
 
 async function editarVisita(
