@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro Diario</title>
+    <link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+
+<div class="contenedor grande">
+
+    <div class="encabezado">
+        <h1>📊 Registro Diario</h1>
+        <p>Consulta las personas que asistieron y lo que se entregó cada día.</p>
+    </div>
+
+    <div class="menu">
+        <a href="panel.html">📋 Panel</a>
+        <a href="administradores.html">👤 Administradores</a>
+        <a href="invitado.html">🔎 Consulta invitado</a>
+        <a href="index.html">🏠 Inicio</a>
+    </div>
+
+    <div class="reporte-filtros">
+        <div>
+            <label for="fecha-registro-diario">📅 Elegir día</label>
+            <input type="date" id="fecha-registro-diario">
+        </div>
+    </div>
+
+    <div id="mensaje-registro-diario"></div>
+
+    <h2>Resumen del día</h2>
+    <div id="resumen-registro-diario" class="tarjetas reporte-tarjetas"></div>
+
+    <h2>📦 Entregas realizadas</h2>
+    <div class="tabla-contenedor">
+        <table class="tabla-reporte">
+            <thead>
+                <tr>
+                    <th>Tipo de entrega</th>
+                    <th>Cantidad</th>
+                </tr>
+            </thead>
+            <tbody id="resumen-entregas">
+                <tr>
+                    <td colspan="2">Cargando...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <h2>👥 Personas que asistieron</h2>
+    <div class="tabla-contenedor">
+        <table class="tabla-reporte">
+            <thead>
+                <tr>
+                    <th>DNI</th>
+                    <th>Nombre</th>
+                    <th>Se entregó</th>
+                    <th>Fecha y hora</th>
+                </tr>
+            </thead>
+            <tbody id="detalle-registro-diario">
+                <tr>
+                    <td colspan="4">Cargando...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="acciones-reporte">
+        <button type="button" id="btn-imprimir-registro">🖨️ Imprimir</button>
+        <button type="button" id="btn-descargar-registro" class="boton-secundario">📥 Descargar</button>
+    </div>
+
+    <hr>
+
+    <h2>📥 Cargar historial anterior</h2>
+    <p class="texto-reporte">
+        Esta opción se usa una sola vez para cargar el CSV con los 786 registros anteriores.
+    </p>
+
+    <div class="importar-historial">
+        <input type="file" id="archivo-historial" accept=".csv">
+        <button type="button" id="btn-importar-historial">📥 Importar historial CSV</button>
+    </div>
+
+    <div class="acciones-panel">
+        <a href="panel.html" class="boton-navegacion">⬅️ Volver al panel</a>
+    </div>
+
+</div>
+
+<script src="supabase-config.js"></script>
+<script src="app.js"></script>
+<script>
+    initRegistroDiario();
+</script>
+
+</body>
+</html>
