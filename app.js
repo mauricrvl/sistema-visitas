@@ -1277,8 +1277,10 @@ async function obtenerHistorialDia(dia) {
     const inicio = `${fecha}T00:00:00-03:00`;
     const fin = `${fecha}T23:59:59.999-03:00`;
 
+    // El Registro Diario toma SIEMPRE los datos actuales de visitas.
+    // historial_visitas queda solamente como respaldo/histórico importado.
     return await api(
-        `/rest/v1/historial_visitas?select=id,dni,nombre,se_entrego,fecha_registro&fecha_registro=gte.${encodeURIComponent(inicio)}&fecha_registro=lte.${encodeURIComponent(fin)}&order=fecha_registro.asc`
+        `/rest/v1/visitas?select=id,dni,nombre,se_entrego,fecha_visita&fecha_visita=gte.${encodeURIComponent(inicio)}&fecha_visita=lte.${encodeURIComponent(fin)}&order=fecha_visita.asc`
     );
 }
 
@@ -1433,10 +1435,21 @@ async function initRegistroDiario() {
             let totalEntregas = 0;
 
             rows.forEach(row => {
-                separarEntregas(row.se_entrego).forEach(parte => {
-                    const item = normalizarEntrega(parte);
+                const entrega = String(row.se_entrego || '').trim();
+
+                // La persona cuenta como visitante aunque no tenga entrega.
+                if (!entrega) return;
+
+                separarEntregas(entrega).forEach(parte => {
+                    const texto = String(parte || '').trim();
+                    if (!texto) return;
+
+                    const item = normalizarEntrega(texto);
                     const nombre = typeof item === 'string' ? item : item.nombre;
                     const cantidad = typeof item === 'string' ? 1 : item.cantidad;
+
+                    if (!nombre || nombre === 'SIN ESPECIFICAR') return;
+
                     grupos.set(nombre, (grupos.get(nombre) || 0) + cantidad);
                     totalEntregas += cantidad;
                 });
@@ -1457,7 +1470,7 @@ async function initRegistroDiario() {
                     <td>${escapeHtml(row.dni)}</td>
                     <td>${escapeHtml(row.nombre)}</td>
                     <td>${escapeHtml(row.se_entrego || '-')}</td>
-                    <td>${escapeHtml(formatArgentina(row.fecha_registro))}</td>
+                    <td>${escapeHtml(formatArgentina(row.fecha_visita))}</td>
                 </tr>
             `).join('') : '<tr><td colspan="4">No hay personas registradas para este día.</td></tr>';
 
