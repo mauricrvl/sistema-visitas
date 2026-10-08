@@ -1027,6 +1027,17 @@ function validarNombre(nombre) {
     return value;
 }
 
+function validarLocalidad(valor) {
+
+    const value = String(valor ?? '').trim();
+
+    if (value.length > 150) {
+        throw new Error('La localidad es demasiado larga.');
+    }
+
+    return value;
+}
+
 function validarSeEntrego(valor) {
 
     const value =
@@ -1068,7 +1079,7 @@ async function consultarDni(dni) {
 async function obtenerVisitas() {
 
     const rows = await api(
-        '/rest/v1/visitas?select=id,dni,nombre,se_entrego,fecha_visita&order=fecha_visita.desc.nullslast'
+        '/rest/v1/visitas?select=id,dni,nombre,localidad,se_entrego,fecha_visita&order=fecha_visita.desc.nullslast'
     );
 
     return (rows || []).sort((a, b) => {
@@ -1126,6 +1137,7 @@ async function guardarHistorialVisita(
 async function registrarVisita(
     dni,
     nombre,
+    localidad,
     seEntrego
 ) {
 
@@ -1134,6 +1146,9 @@ async function registrarVisita(
 
     const valueNombre =
         validarNombre(nombre);
+
+    const valueLocalidad =
+        validarLocalidad(localidad);
 
     const valueSeEntrego =
         validarSeEntrego(seEntrego);
@@ -1163,6 +1178,7 @@ async function registrarVisita(
                 },
                 body: JSON.stringify({
                     nombre: valueNombre,
+                    localidad: valueLocalidad,
                     se_entrego: valueSeEntrego,
                     fecha_visita: ahora
                 })
@@ -1189,6 +1205,7 @@ async function registrarVisita(
             body: JSON.stringify({
                 dni: valueDni,
                 nombre: valueNombre,
+                localidad: valueLocalidad,
                 se_entrego: valueSeEntrego,
                 fecha_visita: ahora
             })
@@ -1277,10 +1294,8 @@ async function obtenerHistorialDia(dia) {
     const inicio = `${fecha}T00:00:00-03:00`;
     const fin = `${fecha}T23:59:59.999-03:00`;
 
-    // El Registro Diario toma SIEMPRE los datos actuales de visitas.
-    // historial_visitas queda solamente como respaldo/histórico importado.
     return await api(
-        `/rest/v1/visitas?select=id,dni,nombre,se_entrego,fecha_visita&fecha_visita=gte.${encodeURIComponent(inicio)}&fecha_visita=lte.${encodeURIComponent(fin)}&order=fecha_visita.asc`
+        `/rest/v1/visitas?select=id,dni,nombre,localidad,se_entrego,fecha_visita&fecha_visita=gte.${encodeURIComponent(inicio)}&fecha_visita=lte.${encodeURIComponent(fin)}&order=fecha_visita.asc`
     );
 }
 
@@ -1435,21 +1450,10 @@ async function initRegistroDiario() {
             let totalEntregas = 0;
 
             rows.forEach(row => {
-                const entrega = String(row.se_entrego || '').trim();
-
-                // La persona cuenta como visitante aunque no tenga entrega.
-                if (!entrega) return;
-
-                separarEntregas(entrega).forEach(parte => {
-                    const texto = String(parte || '').trim();
-                    if (!texto) return;
-
-                    const item = normalizarEntrega(texto);
+                separarEntregas(row.se_entrego).forEach(parte => {
+                    const item = normalizarEntrega(parte);
                     const nombre = typeof item === 'string' ? item : item.nombre;
                     const cantidad = typeof item === 'string' ? 1 : item.cantidad;
-
-                    if (!nombre || nombre === 'SIN ESPECIFICAR') return;
-
                     grupos.set(nombre, (grupos.get(nombre) || 0) + cantidad);
                     totalEntregas += cantidad;
                 });
@@ -1469,10 +1473,11 @@ async function initRegistroDiario() {
                 <tr>
                     <td>${escapeHtml(row.dni)}</td>
                     <td>${escapeHtml(row.nombre)}</td>
+                    <td>${escapeHtml(row.localidad || '-')}</td>
                     <td>${escapeHtml(row.se_entrego || '-')}</td>
                     <td>${escapeHtml(formatArgentina(row.fecha_visita))}</td>
                 </tr>
-            `).join('') : '<tr><td colspan="4">No hay personas registradas para este día.</td></tr>';
+            `).join('') : '<tr><td colspan="5">No hay personas registradas para este día.</td></tr>';
 
             window._registroDiarioActual = rows;
             window._entregasDiarias = grupos;
@@ -1490,8 +1495,8 @@ async function initRegistroDiario() {
     document.querySelector('#btn-descargar-registro')?.addEventListener('click', () => {
         const rows = window._registroDiarioActual || [];
         const contenido = [
-            ['DNI','Nombre','Se entregó','Fecha y hora'].map(csvEscape).join(';'),
-            ...rows.map(row => [row.dni,row.nombre,row.se_entrego || '',formatArgentina(row.fecha_registro)].map(csvEscape).join(';'))
+            ['DNI','Nombre','Localidad','Se entregó','Fecha y hora'].map(csvEscape).join(';'),
+            ...rows.map(row => [row.dni,row.nombre,row.localidad || '',row.se_entrego || '',formatArgentina(row.fecha_visita)].map(csvEscape).join(';'))
         ].join('\n');
         descargarArchivo(`registro_diario_${fecha.value}.csv`, '\ufeff' + contenido);
     });
@@ -1519,6 +1524,7 @@ async function editarVisita(
     id,
     dni,
     nombre,
+    localidad,
     seEntrego
 ) {
 
@@ -1533,6 +1539,9 @@ async function editarVisita(
 
     const valueNombre =
         validarNombre(nombre);
+
+    const valueLocalidad =
+        validarLocalidad(localidad);
 
     const valueSeEntrego =
         validarSeEntrego(seEntrego);
@@ -1550,6 +1559,7 @@ async function editarVisita(
             body: JSON.stringify({
                 dni: valueDni,
                 nombre: valueNombre,
+                localidad: valueLocalidad,
                 se_entrego: valueSeEntrego
             })
         }
@@ -2133,6 +2143,17 @@ function initInvitado() {
                             </p>
 
                             ${
+                                row.localidad
+                                    ? `
+                                        <p>
+                                            <strong>Localidad:</strong>
+                                            ${escapeHtml(row.localidad)}
+                                        </p>
+                                    `
+                                    : ''
+                            }
+
+                            ${
                                 row.se_entrego
                                     ? `
                                         <p>
@@ -2415,6 +2436,7 @@ async function initPanel() {
                                         data-id="${escapeHtml(row.id)}"
                                         data-dni="${escapeHtml(row.dni)}"
                                         data-nombre="${escapeHtml(row.nombre)}"
+                                        data-localidad="${escapeHtml(row.localidad || '')}"
                                         data-se-entrego="${escapeHtml(row.se_entrego || '')}"
                                     >
                                         ✏️ Editar
@@ -2446,6 +2468,7 @@ async function initPanel() {
                                     button.dataset.id,
                                     button.dataset.dni,
                                     button.dataset.nombre,
+                                    button.dataset.localidad,
                                     button.dataset.seEntrego
                                 );
                             }
@@ -2467,6 +2490,7 @@ async function initPanel() {
         id,
         dni,
         nombre,
+        localidad,
         seEntrego
     ) {
 
@@ -2531,6 +2555,18 @@ async function initPanel() {
                     maxlength="100"
                     pattern="[A-Za-zÁÉÍÓÚáéíóúÑñÜü ]+"
                     required
+                >
+
+                <label for="editar-localidad">
+                    Localidad:
+                </label>
+
+                <input
+                    type="text"
+                    id="editar-localidad"
+                    value="${escapeHtml(localidad || '')}"
+                    maxlength="150"
+                    placeholder="Ingrese localidad"
                 >
 
                 <label for="editar-se-entrego">
@@ -2602,6 +2638,11 @@ async function initPanel() {
         const nombreInput =
             editor.querySelector(
                 '#editar-nombre'
+            );
+
+        const localidadInput =
+            editor.querySelector(
+                '#editar-localidad'
             );
 
         const seEntregoInput =
@@ -2678,6 +2719,11 @@ async function initPanel() {
                             nombreInput.value
                         );
 
+                    const nuevaLocalidad =
+                        validarLocalidad(
+                            localidadInput.value
+                        );
+
                     const nuevoSeEntrego =
                         validarSeEntrego(
                             seEntregoInput.value
@@ -2699,6 +2745,7 @@ async function initPanel() {
                         id,
                         nuevoDni,
                         nuevoNombre,
+                        nuevaLocalidad,
                         nuevoSeEntrego
                     );
 
@@ -2885,6 +2932,17 @@ async function initPanel() {
                             </p>
 
                             ${
+                                row.localidad
+                                    ? `
+                                        <p>
+                                            <strong>Localidad:</strong>
+                                            ${escapeHtml(row.localidad)}
+                                        </p>
+                                    `
+                                    : ''
+                            }
+
+                            ${
                                 row.se_entrego
                                     ? `
                                         <p>
@@ -2960,9 +3018,12 @@ async function initPanel() {
                 registerForm.nombre.value =
                     '';
 
+                if (registerForm.localidad) {
+                    registerForm.localidad.value = '';
+                }
+
                 if (registerForm.se_entrego) {
-                    registerForm.se_entrego.value =
-                        '';
+                    registerForm.se_entrego.value = '';
                 }
 
                 registrarSeccion.hidden =
@@ -3019,6 +3080,11 @@ async function initPanel() {
             const nombre =
                 registerForm.nombre.value.trim();
 
+            const localidad =
+                registerForm.localidad
+                    ? registerForm.localidad.value.trim()
+                    : '';
+
             const seEntrego =
                 registerForm.se_entrego
                     ? registerForm.se_entrego.value.trim()
@@ -3028,6 +3094,7 @@ async function initPanel() {
 
                 validarDni(dni);
                 validarNombre(nombre);
+                validarLocalidad(localidad);
                 validarSeEntrego(seEntrego);
 
             } catch (error) {
@@ -3059,6 +3126,7 @@ async function initPanel() {
                 await registrarVisita(
                     dni,
                     nombre,
+                    localidad,
                     seEntrego
                 );
 
@@ -3082,6 +3150,17 @@ async function initPanel() {
                             <strong>DNI:</strong>
                             ${escapeHtml(dni)}
                         </p>
+
+                        ${
+                            localidad
+                                ? `
+                                    <p>
+                                        <strong>Localidad:</strong>
+                                        ${escapeHtml(localidad)}
+                                    </p>
+                                `
+                                : ''
+                        }
 
                         ${
                             seEntrego
@@ -3407,6 +3486,7 @@ async function initExportar() {
         [
             'DNI',
             'Nombre',
+            'Localidad',
             'Se entregó',
             'Fecha',
             'Hora'
@@ -3455,6 +3535,7 @@ async function initExportar() {
         csvRows.push([
             row.dni,
             row.nombre,
+            row.localidad || '',
             row.se_entrego || '',
             fecha,
             hora
