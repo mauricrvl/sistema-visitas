@@ -2418,6 +2418,10 @@ async function initPanel() {
                                 </td>
 
                                 <td>
+                                    ${escapeHtml(row.localidad || '-')}
+                                </td>
+
+                                <td>
                                     ${escapeHtml(row.se_entrego || '-')}
                                 </td>
 
@@ -2448,7 +2452,7 @@ async function initPanel() {
 
                         : `
                             <tr>
-                                <td colspan="5">
+                                <td colspan="6">
                                     No hay visitas registradas.
                                 </td>
                             </tr>
