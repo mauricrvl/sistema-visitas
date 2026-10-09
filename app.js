@@ -2292,6 +2292,70 @@ async function initPanel() {
             '#logout'
         );
 
+    // Buscador general: consulta todos los registros, incluidos RECIBE POR SISTEMA.
+    const busquedaGeneral = document.querySelector('#busqueda-general');
+    const resultadosBusquedaGeneral = document.querySelector('#resultados-busqueda-general');
+    let temporizadorBusquedaGeneral = null;
+
+    if (busquedaGeneral && resultadosBusquedaGeneral) {
+        busquedaGeneral.addEventListener('input', () => {
+            clearTimeout(temporizadorBusquedaGeneral);
+            temporizadorBusquedaGeneral = setTimeout(async () => {
+                const termino = busquedaGeneral.value.trim();
+                if (termino.length < 2) {
+                    resultadosBusquedaGeneral.innerHTML = termino.length
+                        ? '<p>Escribí al menos 2 caracteres para buscar.</p>' : '';
+                    return;
+                }
+                resultadosBusquedaGeneral.innerHTML = '<p>Buscando personas...</p>';
+                try {
+                    const todas = await obtenerVisitas();
+                    const normalizar = valor => String(valor ?? '')
+                        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                        .toLocaleLowerCase('es');
+                    const consulta = normalizar(termino);
+                    const coincidencias = todas.filter(persona => [
+                        persona.dni, persona.nombre, persona.localidad,
+                        persona.se_entrego, persona.cuil,
+                        (!persona.fecha_visita || esPersonaPriset(persona.dni)) ? 'recibe por sistema' : 'asistio'
+                    ].some(valor => normalizar(valor).includes(consulta)));
+
+                    if (!coincidencias.length) {
+                        resultadosBusquedaGeneral.innerHTML = '<div class="resultado no-vino"><p>No se encontraron personas con ese dato.</p></div>';
+                        return;
+                    }
+
+                    resultadosBusquedaGeneral.innerHTML = `
+                        <p><strong>Coincidencias encontradas: ${coincidencias.length}</strong></p>
+                        <div class="tabla-scroll"><table>
+                            <thead><tr><th>Estado</th><th>DNI</th><th>Nombre</th><th>Localidad</th><th>Se entregó</th><th>Fecha y hora</th><th>Acciones</th></tr></thead>
+                            <tbody>${coincidencias.map(persona => {
+                                const recibePorSistema = !persona.fecha_visita || esPersonaPriset(persona.dni);
+                                const estado = recibePorSistema ? '<span class="aviso-priset">🟡 RECIBE POR SISTEMA</span>' : (asistenciaVigente(persona.fecha_visita) ? '🔴 ASISTIÓ' : '⚪ Asistencia vencida');
+                                return `<tr>
+                                    <td>${estado}</td>
+                                    <td>${escapeHtml(persona.dni)}</td>
+                                    <td>${escapeHtml(persona.nombre || '-')}</td>
+                                    <td>${escapeHtml(persona.localidad || '-')}</td>
+                                    <td>${escapeHtml(persona.se_entrego || '-')}</td>
+                                    <td>${escapeHtml(formatArgentina(persona.fecha_visita))}</td>
+                                    <td><button type="button" class="boton-editar btn-editar-desde-busqueda" data-id="${escapeHtml(persona.id)}" data-dni="${escapeHtml(persona.dni)}" data-nombre="${escapeHtml(persona.nombre || '')}" data-localidad="${escapeHtml(persona.localidad || '')}" data-se-entrego="${escapeHtml(persona.se_entrego || '')}">✏️ Editar</button></td>
+                                </tr>`;
+                            }).join('')}</tbody>
+                        </table></div>`;
+                    resultadosBusquedaGeneral.querySelectorAll('.btn-editar-desde-busqueda').forEach(button => {
+                        button.addEventListener('click', () => mostrarEditorVisita(
+                            button.dataset.id, button.dataset.dni, button.dataset.nombre,
+                            button.dataset.localidad, button.dataset.seEntrego
+                        ));
+                    });
+                } catch (error) {
+                    resultadosBusquedaGeneral.innerHTML = `<div class="error">${escapeHtml(error.message || 'No se pudo realizar la búsqueda.')}</div>`;
+                }
+            }, 250);
+        });
+    }
+
     if (
         !searchForm ||
         !searchResult ||
