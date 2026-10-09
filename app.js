@@ -1783,7 +1783,9 @@ async function importarPrisetEnVisitas(archivo) {
         );
 
     const nuevos = [];
+    const actualizarExistentes = [];
     let yaExistian = 0;
+    const fechaImportacion = new Date().toISOString();
 
     for (const registro of registros) {
 
@@ -1792,6 +1794,7 @@ async function importarPrisetEnVisitas(archivo) {
 
         if (existente) {
             yaExistian++;
+            actualizarExistentes.push(existente);
             continue;
         }
 
@@ -1799,9 +1802,23 @@ async function importarPrisetEnVisitas(archivo) {
             dni: registro.dni,
             nombre: registro.nombre,
             cuil: registro.cuil || null,
-            fecha_visita: null,
+            // La importación se registra como asistencia vigente.
+            fecha_visita: fechaImportacion,
             se_entrego: null
         });
+    }
+
+    // Si la persona ya estaba cargada, actualizar su fecha para que también
+    // figure como ASISTIÓ tras importar este Excel.
+    for (const existente of actualizarExistentes) {
+        await api(
+            `/rest/v1/visitas?id=eq.${encodeURIComponent(existente.id)}`,
+            {
+                method: 'PATCH',
+                headers: { Prefer: 'return=minimal' },
+                body: JSON.stringify({ fecha_visita: fechaImportacion })
+            }
+        );
     }
 
     let importados = 0;
@@ -1875,8 +1892,7 @@ function mostrarResultadoImportacion(datos) {
             </p>
 
             <p>
-                🟡 Los registros importados quedan identificados como
-                <strong>RECIBE POR SISTEMA</strong>.
+                Las personas nuevas se guardaron como ASISTIÓ y se actualizó la fecha de asistencia de las personas que ya existían.
             </p>
         </div>
     `;
@@ -2317,7 +2333,10 @@ async function initPanel() {
                     const coincidencias = todas.filter(persona => [
                         persona.dni, persona.nombre, persona.localidad,
                         persona.se_entrego, persona.cuil,
-                        (!persona.fecha_visita || esPersonaPriset(persona.dni)) ? 'recibe por sistema' : 'asistio'
+                        (persona.fecha_visita && asistenciaVigente(persona.fecha_visita))
+                            ? 'asistio' : (esPersonaPriset(persona.dni)
+                                ? 'recibe por sistema' : (!persona.fecha_visita
+                                    ? 'registrado persona registrada' : 'asistencia vencida'))
                     ].some(valor => normalizar(valor).includes(consulta)));
 
                     if (!coincidencias.length) {
@@ -2330,8 +2349,13 @@ async function initPanel() {
                         <div class="tabla-scroll"><table>
                             <thead><tr><th>Estado</th><th>DNI</th><th>Nombre</th><th>Localidad</th><th>Se entregó</th><th>Fecha y hora</th><th>Acciones</th></tr></thead>
                             <tbody>${coincidencias.map(persona => {
-                                const recibePorSistema = !persona.fecha_visita || esPersonaPriset(persona.dni);
-                                const estado = recibePorSistema ? '<span class="aviso-priset">🟡 RECIBE POR SISTEMA</span>' : (asistenciaVigente(persona.fecha_visita) ? '🔴 ASISTIÓ' : '⚪ Asistencia vencida');
+                                const asistioVigente = Boolean(persona.fecha_visita && asistenciaVigente(persona.fecha_visita));
+                                const recibePorSistema = esPersonaPriset(persona.dni) && !asistioVigente;
+                                const estado = asistioVigente
+                                    ? '🔴 ASISTIÓ'
+                                    : (recibePorSistema
+                                        ? '<span class="aviso-priset">🟡 RECIBE POR SISTEMA</span>'
+                                        : (!persona.fecha_visita ? '⚪ REGISTRADO' : '⚪ Asistencia vencida'));
                                 return `<tr>
                                     <td>${estado}</td>
                                     <td>${escapeHtml(persona.dni)}</td>
@@ -2965,12 +2989,9 @@ async function initPanel() {
                 const row =
                     await consultarDni(dni);
 
-                const esPriset =
-                    esPersonaPriset(dni) ||
-                    Boolean(
-                        row &&
-                        !row.fecha_visita
-                    );
+                // Solo los DNI definidos como PRISET son RECIBE POR SISTEMA.
+                // Un registro sin fecha de visita queda como persona registrada.
+                const esPriset = esPersonaPriset(dni);
 
                 if (row && row.fecha_visita && asistenciaVigente(row.fecha_visita)) {
 
@@ -2978,16 +2999,6 @@ async function initPanel() {
                         <div class="resultado ya-vino">
 
                             <h2>🔴 ASISTIÓ</h2>
-
-                            ${
-                                esPriset
-                                    ? `
-                                        <div class="aviso-priset">
-                                            🟡 <strong>RECIBE POR SISTEMA</strong>
-                                        </div>
-                                    `
-                                    : ''
-                            }
 
                             <p>
                                 <strong>Nombre:</strong>
