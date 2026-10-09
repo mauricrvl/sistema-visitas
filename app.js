@@ -1636,151 +1636,118 @@ function obtenerCuilExcel(valor) {
 async function importarPrisetEnVisitas(archivo) {
 
     if (typeof XLSX === 'undefined') {
-        throw new Error(
-            'No se pudo cargar el lector de Excel.'
-        );
+        throw new Error('No se pudo cargar el lector de Excel.');
     }
 
     if (!archivo) {
-        throw new Error(
-            'Seleccioná un archivo Excel.'
-        );
+        throw new Error('Seleccioná un archivo Excel.');
     }
 
-    const buffer =
-        await archivo.arrayBuffer();
-
-    const libro =
-        XLSX.read(buffer, {
-            type: 'array',
-            raw: false
-        });
-
-    const primeraHoja =
-        libro.Sheets[libro.SheetNames[0]];
+    const buffer = await archivo.arrayBuffer();
+    const libro = XLSX.read(buffer, { type: 'array', raw: false });
+    const primeraHoja = libro.Sheets[libro.SheetNames[0]];
 
     if (!primeraHoja) {
-        throw new Error(
-            'El Excel no tiene una hoja válida.'
-        );
+        throw new Error('El Excel no tiene una hoja válida.');
     }
 
-    const filas =
-        XLSX.utils.sheet_to_json(
-            primeraHoja,
-            {
-                header: 1,
-                defval: '',
-                raw: false
-            }
-        );
+    const filas = XLSX.utils.sheet_to_json(primeraHoja, {
+        header: 1,
+        defval: '',
+        raw: false
+    });
 
     if (!filas.length) {
-        throw new Error(
-            'El Excel está vacío.'
-        );
+        throw new Error('El Excel está vacío.');
     }
 
-    const encabezados =
-        filas[0].map(normalizarEncabezadoExcel);
+    const encabezados = filas[0].map(normalizarEncabezadoExcel);
+    const buscarColumna = (...nombres) =>
+        encabezados.findIndex(h => nombres.includes(h));
 
-    const indiceNombre =
-        encabezados.findIndex(
-            h =>
-                h === 'NOMBRE Y APELLIDO' ||
-                h === 'NOMBRE APELLIDO' ||
-                h === 'NOMBRE Y APELLIDOS'
-        );
+    const indiceNombre = buscarColumna(
+        'NOMBRE Y APELLIDO', 'NOMBRE APELLIDO', 'NOMBRE Y APELLIDOS', 'NOMBRE'
+    );
+    const indiceDni = buscarColumna('DNI');
+    const indiceCuil = buscarColumna('CUIL', 'CUIL/CUIT');
+    const indiceLocalidad = buscarColumna('LOCALIDAD', 'CIUDAD', 'BARRIO');
+    const indiceEntrega = buscarColumna(
+        'SE ENTREGO', 'SE ENTREGO', 'ENTREGA', 'PRODUCTO ENTREGADO',
+        'QUE SE ENTREGO', 'QUE SE ENTREGO', 'TAMANO', 'TAMAÑO'
+    );
+    const indiceContacto = buscarColumna('CONTACTO', 'TELEFONO', 'TELÉFONO');
 
-    const indiceDni =
-        encabezados.findIndex(
-            h => h === 'DNI'
-        );
-
-    const indiceCuil =
-        encabezados.findIndex(
-            h =>
-                h === 'CUIL' ||
-                h === 'CUIL/CUIT'
-        );
-
-    if (indiceNombre === -1) {
-        throw new Error(
-            'El Excel debe tener la columna NOMBRE Y APELLIDO.'
-        );
+    if (indiceNombre < 0) {
+        throw new Error('El Excel debe tener la columna NOMBRE Y APELLIDO.');
     }
-
-    if (indiceDni === -1 && indiceCuil === -1) {
-        throw new Error(
-            'El Excel debe tener la columna DNI o CUIL.'
-        );
+    if (indiceDni < 0 && indiceCuil < 0) {
+        throw new Error('El Excel debe tener la columna DNI o CUIL.');
     }
 
     const registros = [];
     const dnisExcel = new Set();
-
     let filasSinDni = 0;
     let dniRepetidosExcel = 0;
 
     for (let i = 1; i < filas.length; i++) {
-
         const fila = filas[i] || [];
+        const nombre = valorExcel(fila[indiceNombre]);
+        const cuil = indiceCuil >= 0 ? obtenerCuilExcel(fila[indiceCuil]) : '';
+        let dni = indiceDni >= 0
+            ? valorExcel(fila[indiceDni]).replace(/\D/g, '')
+            : '';
 
-        const nombre =
-            valorExcel(fila[indiceNombre]);
+        if (!dni && cuil) dni = obtenerDniDesdeCuil(cuil);
 
-        const cuil =
-            indiceCuil >= 0
-                ? obtenerCuilExcel(fila[indiceCuil])
-                : '';
-
-        let dni =
-            indiceDni >= 0
-                ? valorExcel(fila[indiceDni]).replace(/\D/g, '')
-                : '';
-
-        // Si el Excel original no trae DNI, se obtiene internamente
-        // desde el CUIL, pero el CUIL original se conserva.
-        if (!dni && cuil) {
-            dni = obtenerDniDesdeCuil(cuil);
-        }
-
-        if (!dni) {
+        if (!dni || !nombre) {
             filasSinDni++;
             continue;
         }
 
+        // Si el DNI se repite, conservamos la primera fila del Excel.
         if (dnisExcel.has(dni)) {
             dniRepetidosExcel++;
             continue;
         }
-
         dnisExcel.add(dni);
+
+        const localidad = indiceLocalidad >= 0
+            ? valorExcel(fila[indiceLocalidad])
+            : '';
+        let seEntrego = indiceEntrega >= 0
+            ? valorExcel(fila[indiceEntrega])
+            : '';
+
+        // Si el Excel separa el tipo/tamaño y no tiene una columna de entrega,
+        // guardamos el tamaño como información de lo entregado.
+        if (!seEntrego && indiceContacto >= 0) {
+            const contacto = valorExcel(fila[indiceContacto]);
+            if (contacto && !/^\+?[\d\s()-]+$/.test(contacto)) {
+                seEntrego = contacto;
+            }
+        }
 
         registros.push({
             dni,
             nombre,
-            cuil
+            cuil,
+            localidad: localidad || null,
+            se_entrego: seEntrego || null
         });
     }
 
     if (!registros.length) {
-        throw new Error(
-            'No se encontraron personas válidas para importar.'
-        );
+        throw new Error('No se encontraron personas válidas para importar.');
     }
 
-    // Buscamos todos los DNI que ya están en la misma tabla.
+    // Leemos los datos actuales para actualizar las personas existentes.
     const existentes = await api(
-        '/rest/v1/visitas?select=id,dni,nombre,cuil,fecha_visita'
+        '/rest/v1/visitas?select=id,dni,nombre,cuil,localidad,se_entrego,fecha_visita'
     );
 
-    const porDni =
-        new Map(
-            (existentes || []).map(
-                row => [String(row.dni), row]
-            )
-        );
+    const porDni = new Map(
+        (existentes || []).map(row => [String(row.dni), row])
+    );
 
     const nuevos = [];
     const actualizarExistentes = [];
@@ -1788,13 +1755,11 @@ async function importarPrisetEnVisitas(archivo) {
     const fechaImportacion = new Date().toISOString();
 
     for (const registro of registros) {
-
-        const existente =
-            porDni.get(registro.dni);
+        const existente = porDni.get(registro.dni);
 
         if (existente) {
             yaExistian++;
-            actualizarExistentes.push(existente);
+            actualizarExistentes.push({ existente, registro });
             continue;
         }
 
@@ -1802,48 +1767,39 @@ async function importarPrisetEnVisitas(archivo) {
             dni: registro.dni,
             nombre: registro.nombre,
             cuil: registro.cuil || null,
-            // La importación se registra como asistencia vigente.
-            fecha_visita: fechaImportacion,
-            se_entrego: null
+            localidad: registro.localidad,
+            se_entrego: registro.se_entrego,
+            fecha_visita: fechaImportacion
         });
     }
 
-    // Si la persona ya estaba cargada, actualizar su fecha para que también
-    // figure como ASISTIÓ tras importar este Excel.
-    for (const existente of actualizarExistentes) {
+    // Para las personas existentes actualizamos también localidad y entrega,
+    // y actualizamos la fecha para que figuren como ASISTIÓ.
+    for (const item of actualizarExistentes) {
+        const { existente, registro } = item;
         await api(
             `/rest/v1/visitas?id=eq.${encodeURIComponent(existente.id)}`,
             {
                 method: 'PATCH',
                 headers: { Prefer: 'return=minimal' },
-                body: JSON.stringify({ fecha_visita: fechaImportacion })
+                body: JSON.stringify({
+                    nombre: registro.nombre,
+                    localidad: registro.localidad,
+                    se_entrego: registro.se_entrego,
+                    fecha_visita: fechaImportacion
+                })
             }
         );
     }
 
     let importados = 0;
-
-    // Insertamos en bloques para no enviar todo el Excel de una vez.
     for (let i = 0; i < nuevos.length; i += 100) {
-
-        const bloque =
-            nuevos.slice(i, i + 100);
-
-        await api(
-            '/rest/v1/visitas',
-            {
-                method: 'POST',
-
-                headers: {
-                    Prefer:
-                        'return=minimal'
-                },
-
-                body:
-                    JSON.stringify(bloque)
-            }
-        );
-
+        const bloque = nuevos.slice(i, i + 100);
+        await api('/rest/v1/visitas', {
+            method: 'POST',
+            headers: { Prefer: 'return=minimal' },
+            body: JSON.stringify(bloque)
+        });
         importados += bloque.length;
     }
 
