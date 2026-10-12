@@ -1432,3 +1432,13 @@ button:disabled {
         background: transparent !important;
     }
 }
+/* PROGRAMA INCLUIR */
+.resultado.programa-incluir {
+    background: #dff4ff;
+    color: #164e63;
+    border: 2px solid #38bdf8;
+    border-radius: 12px;
+    padding: 22px;
+}
+.resultado.programa-incluir h2 { color: #0369a1; }
+.resultado.programa-incluir p { color: #164e63; }
