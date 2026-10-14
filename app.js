@@ -1275,8 +1275,11 @@ function normalizarEntrega(texto) {
 }
 
 function separarEntregas(texto) {
+    // En la base hay entregas combinadas con coma o con +.
+    // Separamos cada producto para no perder MODULO/BOLSON cuando
+    // aparecen junto con harina, pañales u otros artículos.
     return String(texto || '')
-        .split('+')
+        .split(/[+,]/)
         .map(parte => parte.trim())
         .filter(Boolean);
 }
