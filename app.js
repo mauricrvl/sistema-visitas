@@ -535,48 +535,6 @@ const PRISET_DNIS = new Set([
     '6360140'
 ]);
 
-const PROGRAMA_INCLUIR_DNIS = new Set([
-    '13585173',
-    '54721140',
-    '42081115',
-    '41771436',
-    '39007499',
-    '588838436',
-    '55364740',
-    '46484549',
-    '57008825',
-    '58547840',
-    '35242994',
-    '46805899',
-    '54720327',
-    '39009462',
-    '33846484',
-    '33185681',
-    '55173532'
-]);
-
-function esProgramaIncluir(dni) {
-    const valor = normalizarDniPriset(dni);
-    return valor !== '' && PROGRAMA_INCLUIR_DNIS.has(valor);
-}
-
-function tarjetaProgramaIncluir(dni, row = null) {
-    const nombre = row?.nombre ? `
-        <p><strong>Nombre:</strong> ${escapeHtml(row.nombre)}</p>
-    ` : '';
-    const localidad = row?.localidad ? `
-        <p><strong>Localidad:</strong> ${escapeHtml(row.localidad)}</p>
-    ` : '';
-    return `
-        <div class="resultado programa-incluir" style="background:#dff4ff;border:2px solid #62c5ed;color:#123b50;">
-            <h2 style="color:#087eae;">🔹 PROGRAMA INCLUIR</h2>
-            ${nombre}
-            <p><strong>DNI:</strong> ${escapeHtml(row?.dni || dni)}</p>
-            ${localidad}
-        </div>
-    `;
-}
-
 function normalizarDniPriset(dni) {
     return String(dni ?? '').trim().replace(/\D/g, '');
 }
@@ -2139,9 +2097,7 @@ function initInvitado() {
                 const row =
                     await consultarDni(dni);
 
-                if (esProgramaIncluir(dni)) {
-                    result.innerHTML = tarjetaProgramaIncluir(dni, row);
-                } else if (row && row.fecha_visita && asistenciaVigente(row.fecha_visita)) {
+                if (row && row.fecha_visita && asistenciaVigente(row.fecha_visita)) {
 
                     result.innerHTML = `
                         <div class="resultado ya-vino">
@@ -2333,11 +2289,10 @@ async function initPanel() {
                     const coincidencias = todas.filter(persona => [
                         persona.dni, persona.nombre, persona.localidad,
                         persona.se_entrego, persona.cuil,
-                        esProgramaIncluir(persona.dni)
-                            ? 'programa incluir' : ((persona.fecha_visita && asistenciaVigente(persona.fecha_visita))
-                                ? 'asistio' : (esPersonaPriset(persona.dni)
-                                    ? 'recibe por sistema' : (!persona.fecha_visita
-                                        ? 'registrado persona registrada' : 'asistencia vencida')))
+                        (persona.fecha_visita && asistenciaVigente(persona.fecha_visita))
+                            ? 'asistio' : (esPersonaPriset(persona.dni)
+                                ? 'recibe por sistema' : (!persona.fecha_visita
+                                    ? 'registrado persona registrada' : 'asistencia vencida'))
                     ].some(valor => normalizar(valor).includes(consulta)));
 
                     if (!coincidencias.length) {
@@ -2350,16 +2305,13 @@ async function initPanel() {
                         <div class="tabla-scroll"><table>
                             <thead><tr><th>Estado</th><th>DNI</th><th>Nombre</th><th>Localidad</th><th>Se entregó</th><th>Fecha y hora</th><th>Acciones</th></tr></thead>
                             <tbody>${coincidencias.map(persona => {
-                                const incluir = esProgramaIncluir(persona.dni);
                                 const asistioVigente = Boolean(persona.fecha_visita && asistenciaVigente(persona.fecha_visita));
                                 const recibePorSistema = esPersonaPriset(persona.dni) && !asistioVigente;
-                                const estado = incluir
-                                    ? '<span style="display:inline-block;background:#dff4ff;border:1px solid #62c5ed;border-radius:6px;padding:4px 7px;color:#087eae;font-weight:700;">🔹 PROGRAMA INCLUIR</span>'
-                                    : (asistioVigente
-                                        ? '🔴 ASISTIÓ'
-                                        : (recibePorSistema
-                                            ? '<span class="aviso-priset">🟡 RECIBE POR SISTEMA</span>'
-                                            : (!persona.fecha_visita ? '⚪ REGISTRADO' : '⚪ Asistencia vencida')));
+                                const estado = asistioVigente
+                                    ? '🔴 ASISTIÓ'
+                                    : (recibePorSistema
+                                        ? '<span class="aviso-priset">🟡 RECIBE POR SISTEMA</span>'
+                                        : (!persona.fecha_visita ? '⚪ REGISTRADO' : '⚪ Asistencia vencida'));
                                 return `<tr>
                                     <td>${estado}</td>
                                     <td>${escapeHtml(persona.dni)}</td>
@@ -2992,12 +2944,6 @@ async function initPanel() {
 
                 const row =
                     await consultarDni(dni);
-
-                // PROGRAMA INCLUIR tiene prioridad sobre los demás estados.
-                if (esProgramaIncluir(dni)) {
-                    searchResult.innerHTML = tarjetaProgramaIncluir(dni, row);
-                    return;
-                }
 
                 // Solo los DNI definidos como PRISET son RECIBE POR SISTEMA.
                 // Un registro sin fecha de visita queda como persona registrada.
