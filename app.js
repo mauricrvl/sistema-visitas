@@ -1076,18 +1076,31 @@ async function consultarDni(dni) {
     return rows?.[0] || null;
 }
 
+// Supabase puede limitar cada respuesta a 1000 filas.
+// Recuperamos todas las páginas sin omitir registros.
+async function obtenerTodasLasFilas(ruta, tamanoPagina = 1000) {
+    const resultado = [];
+    let desplazamiento = 0;
+    const separador = ruta.includes('?') ? '&' : '?';
+
+    while (true) {
+        const pagina = await api(
+            `${ruta}${separador}limit=${tamanoPagina}&offset=${desplazamiento}`
+        );
+        if (!Array.isArray(pagina)) {
+            throw new Error('No se pudo obtener la lista de registros.');
+        }
+        resultado.push(...pagina);
+        if (pagina.length < tamanoPagina) break;
+        desplazamiento += pagina.length;
+    }
+    return resultado;
+}
+
 async function obtenerVisitas() {
-
-    const rows = await api(
-        '/rest/v1/visitas?select=id,dni,nombre,localidad,se_entrego,fecha_visita&order=fecha_visita.desc.nullslast'
+    return obtenerTodasLasFilas(
+        '/rest/v1/visitas?select=id,dni,nombre,localidad,se_entrego,fecha_visita&order=fecha_visita.desc.nullslast,id.desc'
     );
-
-    return (rows || []).sort((a, b) => {
-        if (!a.fecha_visita && !b.fecha_visita) return 0;
-        if (!a.fecha_visita) return 1;
-        if (!b.fecha_visita) return -1;
-        return new Date(b.fecha_visita) - new Date(a.fecha_visita);
-    });
 }
 
 function asistenciaVigente(fechaVisita) {
@@ -1297,8 +1310,8 @@ async function obtenerHistorialDia(dia) {
     const inicio = `${fecha}T00:00:00-03:00`;
     const fin = `${fecha}T23:59:59.999-03:00`;
 
-    return await api(
-        `/rest/v1/visitas?select=id,dni,nombre,localidad,se_entrego,fecha_visita&fecha_visita=gte.${encodeURIComponent(inicio)}&fecha_visita=lte.${encodeURIComponent(fin)}&order=fecha_visita.asc`
+    return await obtenerTodasLasFilas(
+        `/rest/v1/visitas?select=id,dni,nombre,localidad,se_entrego,fecha_visita&fecha_visita=gte.${encodeURIComponent(inicio)}&fecha_visita=lte.${encodeURIComponent(fin)}&order=fecha_visita.asc,id.asc`
     );
 }
 
@@ -1744,8 +1757,8 @@ async function importarPrisetEnVisitas(archivo) {
     }
 
     // Leemos los datos actuales para actualizar las personas existentes.
-    const existentes = await api(
-        '/rest/v1/visitas?select=id,dni,nombre,cuil,localidad,se_entrego,fecha_visita'
+    const existentes = await obtenerTodasLasFilas(
+        '/rest/v1/visitas?select=id,dni,nombre,cuil,localidad,se_entrego,fecha_visita&order=id.asc'
     );
 
     const porDni = new Map(
